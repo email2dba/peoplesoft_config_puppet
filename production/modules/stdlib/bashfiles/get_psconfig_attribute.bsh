@@ -1,0 +1,311 @@
+#!/bin/bash  
+
+#------------------------------------------------------------------
+# File Name       : get_psconfig_attribute.bsh
+# File Type       : bash
+# Created on      : MAR-16-2021
+# comments        : it should valled from getter method. 
+# step to do
+# ------------------------------------------------------------------
+#
+#
+##source ${PSOFT_SCR}/dapps_general_functions.bsh
+PRG_NAME=$0
+ECHO=/bin/echo
+SED=/bin/sed
+TR=/usr/bin/tr
+
+#
+#########################################################
+function Usage
+{
+   echo ""
+   echo " Usage : $0 PS_CFG_HOME_PATH ENV_NAME  SERV_TYPE PS_SERV_NME GROUP_NAME ATTRIB_SET"
+   echo ""
+   echo " PS_CFG_HOME_PATH (not null )  "
+   echo " ENV_NAME(not null )  "
+   echo " SERV_TYP(not null )  "
+   echo " SERV_NME(not null )  "
+   echo " GROUP_NAME (optional) : if null, then it will lsit all group names."
+   echo " ATRRIB_SET(not null )  "
+   echo ""
+   echo ""
+   echo " Example :  $ $0  \"/pscfghome/home/psadmin2\" dappsstg  app DAPPSSTG1_1 "
+   echo " Example :  $ $0  \"/pscfghome/home/psadmin2\" dappsstg  app DAPPSSTG1_1 \"[Startup]\"  "
+   echo " Example :  $ $0  \"/pscfghome/home/psadmin2\" dappsstg  app DAPPSSTG1_1 \"[Database Options]\"  "
+   echo ""
+}
+#
+#########################################################
+#
+
+#########################################################
+#
+function verify_notnull ()
+{
+if test -z "$1";
+then
+   echo
+   echo "Error : $2 value not Specified !"
+   echo
+   Usage
+   exit 1
+fi
+}
+
+#########################################################
+function setval_ifnull ()
+{
+if test -z "$1";
+then
+
+#p_tmp=\$"$2"
+#echo "mahen p_tmp = $p_tmp "
+#p_tmp2=`eval "expr \"$p_tmp\" "`
+#echo $2=$p_tmp2
+
+eval "$2=\"$3\""
+
+#echo "NOW $2"
+fi
+}
+#
+#
+#
+#########################################################
+# Function s_lower  Returns input string in lower case
+#########################################################
+function s_lower
+{
+ echo $@ | tr '[A-Z]' '[a-z]'
+}
+#
+#########################################################
+#
+#
+wrdcnt=/usr/bin/wc
+CAT=/bin/cat
+AWK=/bin/awk
+HEAD=/usr/bin/head
+TAIL=/usr/bin/tail
+EXPR=/usr/bin/expr
+#
+#
+PRG_NAME=$0
+PS_CFG_HOME_PATH=$1
+ENV_NAME=$2
+SERV_TYP=$3 
+PS_SERV_NME=$4 
+GROUP_NAME=$5
+ATTRIB_SET=$6   
+
+setval_ifnull "$PS_CFG_HOME_PATH" PS_CFG_HOME_PATH "/pscfghome/home/psadmin2"
+
+verify_notnull "$ENV_NAME"  "ENV_NAME" 
+verify_notnull "$SERV_TYP"  "SERV_TYP" 
+verify_notnull "$PS_SERV_NME"  "PS_SERV_NME"
+ 
+
+setval_ifnull "$GROUP_NAME"  GROUP_NAME "ALL"
+setval_ifnull "$ATTRIB_NAME" ATTRIB_NAME "ALL"
+
+
+##lcl_attrib_set=($(/bin/echo $ATTRIB_SET | /usr/bin/tr "," "\n"))
+
+IFS="," read -a lcl_attrib_set <<< $ATTRIB_SET
+
+#Print the split string
+##for attrib_name in "${lcl_attrib_set[@]}"
+##do
+##    echo "$attrib_name"
+##done
+
+
+## commented on 20210316
+##echo " ENV_NAME  SERV_TYPE PS_SERV_NME GROUP_NAME  =  $ENV_NAME :  $SERV_TYP : $PS_SERV_NME : $GROUP_NAME "
+
+
+if [[ $GROUP_NAME == \[* ]]
+then
+##commented on 20210316
+##echo  "GROUP_NAME given by user : $GROUP_NAME" ;
+ATTRIB_NAME="ALL"   
+else
+GROUP_NAME=ALL
+fi
+#
+
+if [[ $GROUP_NAME == "ALL" ]]
+then
+ATTRIB_NAME="NONE"   
+fi
+
+##if [[ $ATTRIB_NAME == "ALL" ]]
+##then
+##echo  "Print all attributes of : $GROUP_NAME" ;
+##fi
+
+ 
+PTRN="."
+REM_STR=";" 
+GROUP_IDENFN_STR="[" 
+
+if [[ $SERV_TYP == "app" ]]  
+then
+##CFG_FLE_NME=${PS_CFG_HOME_PATH}/${ENV_NAME}/appserv/${PS_SERV_NME}/psappsrv.cfg
+CFG_FLE_NME=${PS_CFG_HOME_PATH}/appserv/${PS_SERV_NME}/psappsrv.cfg
+else
+##CFG_FLE_NME=${PS_CFG_HOME_PATH}/${ENV_NAME}/appserv/prcs/${PS_SERV_NME}/psprcs.cfg
+CFG_FLE_NME=${PS_CFG_HOME_PATH}/appserv/prcs/${PS_SERV_NME}/psprcs.cfg
+fi
+##-------------------------------
+## Find Total Rows in that file
+##-------------------------------
+
+TOTCFGROWS=$($CAT  ${CFG_FLE_NME} | $wrdcnt |  $AWK '{ print $1 }')
+TOTCOL=5
+
+#########################################################
+## List Group only Here
+##########################################################
+
+
+if [[ ${GROUP_NAME} == "ALL" ]] ; then
+
+for ((tv_currow=1; tv_currow<=$TOTCFGROWS; tv_currow++))
+do
+tv_negval=`$EXPR $tv_currow \* -1`
+CFGSTR=$($HEAD $tv_negval  ${CFG_FLE_NME} | $TAIL -1  )
+
+#echo "I am here"
+tarr_colval=($CFGSTR)
+
+#
+if [[ ${tarr_colval[0]} == \[* ]] ; then
+echo " group name(s) : $CFGSTR "
+  continue
+fi
+#
+done
+exit 0 ;
+
+fi ;
+
+ 
+#########################################################
+## List ALL Attributes of Group Here
+##########################################################
+GROUP_FOUND="false" ;
+
+declare -i valzero=0
+declare -i iival=0
+
+CFGSTR3=""
+GROUP_NAME2=${GROUP_NAME}
+GROUP_NAME="${GROUP_NAME//\ /Z}"
+
+
+TOTCFGROWS=$($CAT  ${CFG_FLE_NME} | $wrdcnt |  $AWK '{ print $1 }')
+
+if [[ ${ATTRIB_NAME} == "ALL"  ]]  ; then
+##echo " attib_ flag is : $ATTRIB_NAME "
+##echo " =========================="
+
+for ((tv_currow=1; tv_currow<=$TOTCFGROWS; tv_currow++))
+do
+
+
+tv_negval=`$EXPR $tv_currow \* -1`
+CFGSTR=$($HEAD $tv_negval  ${CFG_FLE_NME} | $TAIL -1  )
+
+CFGSTR2="${CFGSTR}"
+CFGSTR="${CFGSTR//\ /Z}"
+
+
+rowsize_num=`$EXPR ${#CFGSTR} \* 1`
+tarr_colval=($CFGSTR)
+
+if [[ ${rowsize_num} -le 4  ]] ; then
+continue 
+fi
+
+if  [[ ${CFGSTR} == \;* ]]    ; then
+continue 
+fi
+#
+#
+
+if  [[ ${CFGSTR} != *=* ]]  && [[ ${GROUP_FOUND} == "true"  ]]  ; then
+break
+fi
+
+if [[ "${CFGSTR}"  == "${GROUP_NAME}" ]] ; then
+#echo "Group Found : ${GROUP_NAME} =:= ${CFGSTR} xxx"
+###commented on 20210316
+###echo "Group Found : ${GROUP_NAME2} and string in file  ${CFGSTR2} "
+GROUP_FOUND="true" ;
+fi
+#
+if [[ ${GROUP_FOUND} == "true"  ]]  ; then
+if  [[ ${CFGSTR} == \;* ]]    ; then
+x=x
+else
+
+IFS='=' read -a fle_attrib_set <<< $CFGSTR2
+
+iival=0
+
+fle_attrib_name=${fle_attrib_set[0]}
+fle_attrib_val=${fle_attrib_set[1]}
+
+
+##echo "fle_attrib_name: $fle_attrib_name "
+##echo "fle_attrib_val: $fle_attrib_val "
+
+##echo " File Atrrib name : ${fle_attrib_set[0]}"
+##echo "Attrib Value :  $CFGSTR2"
+
+
+##fle_attrib_name=$fle_attrib_set
+fle_attrib_name=`$ECHO ${fle_attrib_name} | $TR '[A-Z]' '[a-z]'`
+fle_attrib_name=`$ECHO "$fle_attrib_name" | $SED 's/ //g'`
+
+##echo "File Attrib Name:  ${fle_attrib_name}"
+
+CFGSTR2=`$ECHO ${CFGSTR2} | $TR '[A-Z]' '[a-z]'`
+
+if [[ "$ATTRIB_SET" =~ "$fle_attrib_name" ]] ; then
+##echo "$CFGSTR2"
+
+if [[ $valzero -ne ${#CFGSTR3} ]] ;then
+CFGSTR3="${CFGSTR3},"
+fi
+##CFGSTR3="${CFGSTR3}${CFGSTR2}"
+CFGSTR3="${CFGSTR3}${fle_attrib_name}=${fle_attrib_val}"
+fi
+
+fi
+
+fi
+
+#
+#
+done
+##
+CFGSTR3=`$ECHO "$CFGSTR3" | $SED 's/ //g'`
+##$ECHO -n  ${CFGSTR3} | $TR '[A-Z]' '[a-z]'
+$ECHO -n ${CFGSTR3} 
+
+exit 0 ;
+
+fi ;
+
+##########################################################
+# Program End Here
+##########################################################
+#
+exit 0 ;
+#
+#
+#
+

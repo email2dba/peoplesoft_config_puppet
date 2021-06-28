@@ -1,0 +1,129 @@
+#!/bin/bash
+#---------------------------------------------------------------------
+# File Name       : find_web_admin_server_status.bsh
+# File Type       : bash
+# Created on      : MAR-23-2021
+# Last updated by : company.com
+# comments        : PS web admin server status 
+# step to do      : To identify http/https server is running or not
+#---------------------------------------------------------------------
+#
+PRG_NAME=$0 
+#---------------------------------------------------------------------
+# Function usage  will give help
+#---------------------------------------------------------------------
+function Usage
+{
+   echo ""
+   echo " Usage : $0 PYTHON_BIN_LOC PYTHON_SCRIPTS_LOC PS_CFG_HME DOMAIN_NAME  WEB_ADMIN_SRVR_HOST PORT_TYPE PORT_NUM ADMIN_ID ADMIN_PWD"
+   echo ""
+   echo ""
+   echo ""
+   echo " Example : $ $0 PYTHON_BIN_LOC PYTHON_SCRIPTS_LOC /pscfghome/home/psadmin2/dappsprd  DAPPSPRD1_1 poeldapm01.bdc.ti.company.com http 14001 "
+   echo ""
+   echo " Example : $ $0 PYTHON_BIN_LOC PYTHON_SCRIPTS_LOC /pscfghome/home/psadmin2/dappsstg  DAPPSSTG1_1 soeldapm01.bdc.ti.company.com https 14071 "
+  echo " "
+}
+#
+#
+#---------------------------------------------------------------------
+# Function verify_notnull  will identify  not null parameter
+#---------------------------------------------------------------------
+#
+function verify_notnull ()
+{
+if test -z "$1";
+then
+   echo
+   echo "Error : $2 value not Specified !"
+   echo
+   Usage
+   exit 1
+fi
+}
+#
+#
+#
+##########################################################
+# Function s_upper  Returns input string in upper case
+#########################################################
+function s_upper
+{
+ echo $@ | tr '[a-z]' '[A-Z]'
+}
+#
+#
+#########################################################
+function setval_ifnull ()
+{
+if test -z "$1";
+then
+eval "$2=\"$3\""
+fi
+}
+#
+#
+#---------------------------------------------------------------------
+# Main Code Starts Here
+#---------------------------------------------------------------------
+PYTHON_BIN_LOC=$1 
+PYTHON_SCRIPTS_LOC=$2
+PS_CFG_HME=$3
+DOMAIN_NAME=$4
+WEB_ADMIN_SRVR_HOST=$5
+
+PORT_HTTP=$6 
+PORT_HTTPS=$7 
+ADMIN_ID=$8
+ADMIN_PWD="$9"
+PIA_NAME="${10}"
+
+verify_notnull "$PYTHON_BIN_LOC"  "PYTHON_BIN_LOC"
+verify_notnull "$PYTHON_SCRIPTS_LOC"  "PYTHON_SCRIPTS_LOC"
+verify_notnull "$PS_CFG_HME"  "PS_CFG_HME"
+verify_notnull "$DOMAIN_NAME"  "DOMAIN_NAME"
+verify_notnull "$WEB_ADMIN_SRVR_HOST"  "WEB_ADMIN_SRVR_HOST"
+
+verify_notnull "$ADMIN_ID"  "ADMIN_ID"   
+verify_notnull "$ADMIN_PWD" "ADMIN_PWD"   
+verify_notnull "$PIA_NAME"  "PIA_NAME"   
+
+
+PATH=$PYTHON_BIN_LOC:$PATH
+export PATH
+PROG_NAME=${PYTHON_SCRIPTS_LOC}/find_status_PIA_domain_server.py
+
+source ${PS_CFG_HME}/webserv/${DOMAIN_NAME}/bin/setEnv.sh
+
+RETSTR=`${JAVA_HOME}/bin/java   \
+        -Dweblogic.security.TrustKeyStore=CustomTrust \
+        -Dweblogic.security.CustomTrustKeyStoreFileName=${PS_CFG_HME}/webserv/${DOMAIN_NAME}/piaconfig/keystore/pskey \
+        -Dweblogic.security.CustomTrustKeyStoreType=jks \
+        -Dweblogic.security.SSL.ignoreHostnameVerification=true weblogic.WLST  ${PROG_NAME} \
+                     "$WEB_ADMIN_SRVR_HOST" "$PORT_HTTP" "$PORT_HTTPS" "$ADMIN_ID" "$ADMIN_PWD" "$PIA_NAME" `
+ERRORLEVEL=$?
+
+
+
+TEMP_STS='START'
+
+if [[ "$RETSTR" == *"$TEMP_STS"* ]]; then
+  echo "$RETSTR .  UP and RUNNING "
+  exit 0
+fi
+
+TEMP_STS='RUNNING'
+if [[ "$RETSTR" == *"$TEMP_STS"* ]]; then
+  echo "$RETSTR .  UP and RUNNING "
+  exit 0
+else
+  echo "DOWN_OR_UNKOWN"
+  exit 2
+fi
+
+#---------------------------------------------------------------------
+# Main Code END Here
+#---------------------------------------------------------------------
+
+##exit $ERRORLEVEL
+

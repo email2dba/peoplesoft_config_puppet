@@ -1,0 +1,66 @@
+gbl_prcs_msln_attrib:
+  msln_encryption: ENCRYPT
+  msln_dboptions_enabledbmonitoring: 0
+  sqrbin: "%PS_HOME%/bin/sqr/%PS_DB%/bin"
+  logoutdir: "%PS_SERVDIR%/log_output"
+
+gbl_prcs_pwd_attrib:
+  pwd_domainconnpwd: "U2FsdxxxxxxxxxxxGPKL54="
+  pwd_userpswd: "U2FsdGxxxxxxxxxxxxxxm2IMBwc="
+  pwd_connectpswd: "U2Fsxxxxxxxxxxxxx9hB+cw="
+  pwd_remoteadminpwd: "U2FxxxxxxxxxxxxxxB+cw="
+
+gbl_prcs_db_attrib:
+  dbname: PROJPRD
+  dbtype: ORACLE
+  userid: PS
+  connectid: persons
+
+gbl_prcs_process_scheduler:
+  allowdynamicchanges: Y
+  addtopath: "/apps/oracle/product/12.2/db/bin"
+  maxreconnectattempt: 12
+
+gbl_prcs_pstools:
+  enableremoteddmin: 1
+  remoteadminport: 10200
+  remoteadminuserid: admin
+  enableppmagent: 1
+  dbflags: 8
+
+gbl_prcs_psdstsrv:
+  mininstances: 2
+  maxinstances: 2
+
+gbl_prcs_psaesrv:
+  maxinstances: 10
+  recyclecount: 1000
+  allowed_consec_service_failures: 5
+
+gbl_prcs_sqr:
+  pssqr: "%PS_CUST_HOME%/sqr:%PS_APP_HOME%/sqr:%PS_HOME%/sqr"
+
+gbl_prcs_datamover:
+   lastscriptsdir: "%PS_CUST_HOME%/scripts:%PS_APP_HOME%/scripts:%PS_HOME%/scripts"
+
+gbl_prcs_psmonitorsrv:
+   javavm_options: '-Dxdo.ConfigFile=%PS_HOME%/appserv/xdo.cfg -Xms512m -Xmx512m'
+
+gbl_prcs_smtp:
+  smtpserver: mail.company.com
+  smtpport: 25
+  smtpsender: "abcd.proj.support.list@company.com"
+
+
+gbl_prcs_feature_str: '{MSTRSRV}=Yes'
+
+gbl_prcs_ps_location:
+  ps_home: "/psoft/pt/ps_home8.58.08"
+  ps_app_home: "/psoft/hcm/projstg"
+  ps_config_home: "/pscfghome/home/psadmin2/projstg_new"
+  ps_custom_home: "/psoft/hcm/proj/projstg"
+
+gbl_prcs_scripts_file_location:
+   psft_env_sh_location: "/psoft/psoft_scripts/utils"
+   bash_file_location: "/psoft/psoft_scripts/utils/puppet_code/proj_psadmin/production/modules/stdlib/bashfiles"
+   python_file_location: "/psoft/psoft_scripts/utils/puppet_code/proj_psadmin/production/modules/stdlib/python_source"

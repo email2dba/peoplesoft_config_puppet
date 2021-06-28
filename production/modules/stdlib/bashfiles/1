@@ -1,0 +1,98 @@
+#!/bin/bash 
+
+#------------------------------------------------------------------
+# File Name       : psadmin_prcs_server_creation.bsh  
+# File Type       : bash
+# Created on      : MAR-17-2021
+# comments        : It should executed from create method. 
+# step to do
+# ------------------------------------------------------------------
+#
+# 
+PRG_NAME=$0
+ECHO=/bin/echo
+SED=/bin/sed
+TR=/usr/bin/tr
+
+#
+#########################################################
+function Usage
+{
+   echo ""
+   echo " Usage : $0 PSFT_ENV_SH_LOCN ENV_NAME PS_SERV_NME STARTUP_ATTRIB_STR  "
+   echo ""
+   echo " PSFT_ENV_SH_LOCN   psft_env.sh location. We must have ps_unset_config.sh and psconfig.sh files in this dir "
+   echo " ENV_NAME(not null )  "
+   echo " SERV_NME(not null )  "
+   echo " STARTUP_ATTRIB_STR (not null ) : Example DPOEMDEV,ORACLE,PSUNX6,BCAPPSRV,etc"
+   echo "" 
+   echo "" 
+   echo ""
+}
+#
+#########################################################
+#
+#########################################################
+#
+function verify_notnull ()
+{
+if test -z "$1";
+then
+   echo
+   echo "Error : $2 value not Specified !"
+   echo
+   Usage
+   exit 1
+fi
+}
+
+#########################################################
+function setval_ifnull ()
+{
+if test -z "$1";
+then
+
+#p_tmp=\$"$2"
+#echo "mahen p_tmp = $p_tmp "
+#p_tmp2=`eval "expr \"$p_tmp\" "`
+#echo $2=$p_tmp2
+
+eval "$2=\"$3\""
+
+#echo "NOW $2"
+fi
+}
+#
+#########################################################
+#
+#
+wrdcnt=/usr/bin/wc
+CAT=/bin/cat
+AWK=/bin/awk
+HEAD=/usr/bin/head
+TAIL=/usr/bin/tail
+EXPR=/usr/bin/expr
+#
+#
+PRG_NAME=$0
+PSFT_ENV_SH_LOCN=$1
+ENV_NAME=$2
+PS_SERV_NME=$3 
+STARTUP_ATTRIB_STR=$4  
+ 
+ 
+verify_notnull "$PSFT_ENV_SH_LOCN" "PSFT_ENV_SH_LOCN"  
+verify_notnull "$ENV_NAME"  "ENV_NAME"  
+verify_notnull "$PS_SERV_NME"  "PS_SERV_NME"
+
+verify_notnull "$STARTUP_ATTRIB_STR"  "STARTUP_ATTRIB_STR"
+  
+PS_ENV=$ENV_NAME
+export PS_ENV
+
+##.  ${PSFT_ENV_SH_LOCN}/psft_env4dappspuppet.sh
+#.  /apps/mwhome/psoft/pt/psft_env.sh
+
+.  /psoft/pt/psft_env.sh
+${PS_HOME}/bin/psadmin -p create  -d ${PS_SERV_NME} -t "unix" -ps ${STARTUP_ATTRIB_STR} 
+ 

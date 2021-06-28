@@ -1,0 +1,119 @@
+#!/bin/bash -x
+#------------------------------------------------------------------
+# File Name       : web_copy_boot_prop_file.bsh
+# File Type       : bash
+# Created on      : MAR-14-2021
+# Last updated by : company.com
+# comments        : 
+# step to do
+#------------------------------------------------------------------
+#
+
+PRG_NAME=$0
+
+
+SCP="/usr/bin/scp"
+
+
+#---------------------------------------------------------------------
+# Function usage  will give help
+#---------------------------------------------------------------------
+function Usage
+{
+   echo ""
+   echo " Usage : $0 PS_CFG_HME source_server SOURCE_DOMAIN  TARGET_DOMAIN"
+   echo ""
+   echo ""
+   echo ""
+   echo " "
+}
+#
+#
+#---------------------------------------------------------------------
+# Function verify_notnull  will identify  not null parameter
+#---------------------------------------------------------------------
+#
+function verify_notnull ()
+{
+if test -z "$1";
+then
+   echo
+   echo "Error : $2 value not Specified !"
+   echo
+   Usage
+   exit 1
+fi
+}
+#
+#
+#
+##########################################################
+# Function s_upper  Returns input string in upper case
+#########################################################
+function s_upper
+{
+ echo $@ | tr '[a-z]' '[A-Z]'
+}
+#
+#
+#########################################################
+function setval_ifnull ()
+{
+if test -z "$1";
+then
+
+eval "$2=\"$3\""
+
+fi
+}
+#
+#
+#---------------------------------------------------------------------
+# Main Code Starts Here
+#---------------------------------------------------------------------
+PS_CFG_HME=$1
+SOURCE_SERVER=$2
+
+SOURCE_DOMAIN=$3
+TARGET_DOMAIN=$4
+
+DOMAIN_USER="$5"
+DOMAIN_PWD="$6"
+
+
+verify_notnull "$PS_CFG_HME"  "PS_CFG_HME"
+verify_notnull "$SOURCE_SERVER"  "SOURCE_SERVER"
+
+verify_notnull "$SOURCE_DOMAIN"  "SOURCE_DOMAIN"
+verify_notnull "$TARGET_DOMAIN"  "TARGET_DOMAIN"
+
+echo " "
+echo " PS_CFG_HME  $PS_CFG_HME"
+echo " SOURCE_SERVER  $SOURCE_SERVER "
+echo " SOURCE_DOMAIN  $SOURCE_DOMAIN "
+echo " TARGET_DOMAIN  $TARGET_DOMAIN "
+echo " "
+
+echo " "
+echo " Copying boot.properties Admin server into Managed server"
+echo " "
+
+${SCP} -q  ${SOURCE_SERVER}:${PS_CFG_HME}/webserv/${SOURCE_DOMAIN}/servers/WebLogicAdmin/security/boot.properties  ${PS_CFG_HME}/webserv/${TARGET_DOMAIN}/servers/WebLogicAdmin/security/boot.properties
+
+
+##echo "username=$DOMAIN_USER" >${PS_CFG_HME}/webserv/${TARGET_DOMAIN}/servers/WebLogicAdmin/security/boot.properties
+##echo "password=$DOMAIN_PWD" >>${PS_CFG_HME}/webserv/${TARGET_DOMAIN}/servers/WebLogicAdmin/security/boot.properties
+
+${SCP} -q ${SOURCE_SERVER}:${PS_CFG_HME}/webserv/${SOURCE_DOMAIN}/config/config.xml ${PS_CFG_HME}/webserv/${TARGET_DOMAIN}/config/config.xml 
+
+echo " "
+echo " boot.properties COPIED. FILECOPY successful."
+echo " "
+
+RETSTR=" boot.properties COPIED. FILECOPY successful."
+#---------------------------------------------------------------------
+# Main Code END Here
+#---------------------------------------------------------------------
+echo $RETSTR  
+exit 0
+

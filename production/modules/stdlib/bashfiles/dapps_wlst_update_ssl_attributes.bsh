@@ -1,0 +1,179 @@
+#!/bin/bash
+#------------------------------------------------------------------
+# File Name       : dapps_wlst_webconfig_update4mangedserver.bsh
+# File Type       : bash
+# Created on      : MAR-25-2021
+# comments        :  This program calls dapps_wlst_webconfig_update4mangedserver.py
+# This program created for puppet to create resource.
+# Resource provider dapps_config_web_server calls this batch file.
+#------------------------------------------------------------------
+#
+
+PRG_NAME=$0
+PS_ENV=dappsstg
+
+#---------------------------------------------------------------------
+# Function usage  will give help
+#---------------------------------------------------------------------
+function Usage
+{
+   echo ""
+   echo " Usage : $0 PYTHON_BIN_LOC PYTHON_SCR_LOC PS_CFG_HME DOMAIN_NAME MNGED_SRVR_NME WEB_ADMIN_SRVR_HOST PORT_NUM ADMIN_ID ADMIN_PWD"
+   echo "             IdentityKeyStorePwd TrustKeyStorePwd PrivateKeyAlias PrivateKeyPwd"
+   echo ""
+   echo ""
+   echo " Example : $ $0 PYTHON_BIN_LOC PYTHON_SCRIPTS_LOC /pscfghome/home/psadmin2/dappsstg PROG_NAME DAPPSSTG1_2 PIA2 WEB_ADMIN_SRVR_HOST PORT_NUM ADMIN_ID PWD" 
+   echo " Example : $ $0 PYTHON_BIN_LOC PYTHON_SCRIPTS_LOC /pscfghome/home/psadmin2/dappsstg PROG_NAME  DAPPSPRD3_2 PIA7 WEB_ADMIN_SRVR_HOST PORT_NUM ADMIN_ID PWD"
+   echo " "
+}
+#
+#
+#---------------------------------------------------------------------
+# Function verify_notnull  will identify  not null parameter
+#---------------------------------------------------------------------
+#
+function verify_notnull ()
+{
+if test -z "$1";
+then
+   echo
+   echo "Error : $2 value not Specified !"
+   echo
+   Usage
+   exit 1
+fi
+}
+#
+#
+#
+##########################################################
+# Function s_upper  Returns input string in upper case
+#########################################################
+function s_upper
+{
+ echo $@ | tr '[a-z]' '[A-Z]'
+}
+#
+#
+#########################################################
+function setval_ifnull ()
+{
+if test -z "$1";
+then
+
+eval "$2=\"$3\""
+
+fi
+}
+#
+#
+#---------------------------------------------------------------------
+# Main Code Starts Here
+#---------------------------------------------------------------------
+PYTHON_BIN_LOC=$1
+PYTHON_SCR_LOC=$2
+PS_CFG_HME=$3
+
+DOMAIN_NAME=$4
+PIA_NME=$5
+
+WEB_ADMIN_SRVR_HOST=$6
+PORT_HTTP=$7
+PORT_HTTPS=$8
+ADMIN_ID=${9}
+ADMIN_PWD=${10}
+
+PIAListenAddress=${11}
+PIAhttp_port=${12}
+PIAhttps_port=${13}
+IdentityKeyStorePwd=${14} 
+TrustKeyStorePwd=${15}
+PrivateKeyAlias=${16}
+
+PrivateKeyPwd=${17} 
+
+verify_notnull "$PYTHON_BIN_LOC"  "PYTHON_BIN_LOC"
+verify_notnull "$PYTHON_SCR_LOC"  "PYTHON_SCR_LOC"
+verify_notnull "$PS_CFG_HME"  "PS_CFG_HME"
+verify_notnull "$DOMAIN_NAME"  "DOMAIN_NAME"
+verify_notnull "$PIA_NME"  "PIA_NME"
+
+verify_notnull "$WEB_ADMIN_SRVR_HOST"  "WEB_ADMIN_SRVR_HOST"
+
+verify_notnull "$ADMIN_ID"  "ADMIN_ID"
+verify_notnull "$ADMIN_PWD"  "ADMIN_PWD"
+
+
+source ${PS_CFG_HME}/webserv/${DOMAIN_NAME}/bin/setEnv.sh
+PATH=$PYTHON_BIN_LOC:$PATH
+export PATH
+
+echo " PIA NAME to be configure : $PIA_NME"
+
+echo "WEB_ADMIN_SRVR_HOST = $WEB_ADMIN_SRVR_HOST"
+echo "ADMIN_PORT_HTTP   $PORT_HTTP "
+echo "ADMIN_PORT_HTTPS= $PORT_HTTPS "
+echo "ADMIN_ID=   $ADMIN_ID "
+echo "ADMIN_PWD=  $ADMIN_PWD "
+
+echo "PIAListenAddress     ${PIAListenAddress} "
+echo "PIAhttp_port         ${PIAhttp_port} "
+echo "PIAhttps_port        ${PIAhttps_port} "
+echo "IdentityKeyStorePwd  ${IdentityKeyStorePwd} "
+echo "TrustKeyStorePwd     ${TrustKeyStorePwd} "
+echo "PrivateKeyAlias      ${PrivateKeyAlias}"
+echo "PrivateKeyPwd        ${PrivateKeyPwd} "
+
+
+
+PROG_NAME="${PYTHON_SCR_LOC}/dapps_wlst_update_ssl_attributes.py"
+
+RETSTR=`${JAVA_HOME}/bin/java   \
+        -Dweblogic.security.TrustKeyStore=CustomTrust \
+        -Dweblogic.security.CustomTrustKeyStoreFileName=${PS_CFG_HME}/webserv/${DOMAIN_NAME}/piaconfig/keystore/pskey \
+        -Dweblogic.security.CustomTrustKeyStoreType=jks \
+        -Dweblogic.security.SSL.ignoreHostnameVerification=true weblogic.WLST ${PROG_NAME} $WEB_ADMIN_SRVR_HOST \
+                 $PORT_HTTP $PORT_HTTPS $ADMIN_ID "$ADMIN_PWD"  "$PIA_NME" \
+                 "$PIAListenAddress" "$PIAhttp_port" "$PIAhttps_port" "$IdentityKeyStorePwd" "$TrustKeyStorePwd" \
+                                   "$PrivateKeyAlias" "$PrivateKeyPwd" `
+
+TEMP_STS='UPDATION_NOT_REQUIRE'
+
+if [[ "$RETSTR" == *"$TEMP_STS"* ]]; then
+  echo "$RETSTR .  UPDATION_NOT_REQUIRE in admin console "
+  exit 0
+fi
+
+
+TEMP_STS='UPDATION_SUCCESSFUL'
+if [[ "$RETSTR" == *"$TEMP_STS"* ]]; then
+  echo "$RETSTR .  UPDATION_SUCCESSFUL in admin console "
+  exit 0
+fi
+
+TEMP_STS='ADMIN_SERVER_ERROR'
+
+if [[ "$RETSTR" == *"$TEMP_STS"* ]]; then
+  echo "$RETSTR .  ADMIN_SERVER_ERROR in admin console "
+  exit 2
+fi
+
+TEMP_STS='PIA_NOT_AVAILABLE'
+if [[ "$RETSTR" == *"$TEMP_STS"* ]]; then
+  echo "$RETSTR . PIA_NOT_AVAILABLE  in admin console "
+  exit 3
+fi
+
+
+TEMP_STS='UPDATION_FAILED'
+if [[ "$RETSTR" == *"$TEMP_STS"* ]]; then
+  echo "$RETSTR . UPDATION_FAILED  in admin console "
+  exit 4
+fi
+
+
+#---------------------------------------------------------------------
+# Main Code END Here
+#---------------------------------------------------------------------
+
+exit 0

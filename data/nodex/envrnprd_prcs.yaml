@@ -1,0 +1,40 @@
+
+projprd_prcs_db_attrib:
+  dbname: PROJPRD
+  environmentname: projprd
+  dbtype: "%{hiera('gbl_prcs_db_attrib.dbtype')}"
+  userid: "%{hiera('gbl_prcs_db_attrib.userid')}"
+  connectid: "%{hiera('gbl_prcs_db_attrib.connectid')}"
+
+projprd_prcs_pwd_attrib:
+  pwd_domainconnpwd: "%{hiera('gbl_prcs_pwd_attrib.pwd_domainconnpwd')}"
+  pwd_userpswd: "%{hiera('gbl_prcs_pwd_attrib.pwd_userpswd')}"  
+  pwd_connectpswd: "%{hiera('gbl_prcs_pwd_attrib.pwd_connectpswd')}"
+  pwd_remoteadminpwd: "%{hiera('gbl_prcs_pwd_attrib.pwd_remoteadminpwd')}"
+
+projprd_prcs_process_scheduler:
+  allowdynamicchanges: "%{hiera('gbl_prcs_process_scheduler.allowdynamicchanges')}"  
+  addtopath: "%{hiera('gbl_prcs_process_scheduler.addtopath')}"  
+  maxreconnectattempt: "%{hiera('gbl_prcs_process_scheduler.maxreconnectattempt')}"  
+
+projprd_prcs_pstools:
+  enableremoteddmin: "%{hiera('gbl_prcs_pstools.enableremoteddmin')}"  
+  remoteadminport: "%{hiera('gbl_prcs_pstools.remoteadminport')}"  
+  remoteadminuserid: "%{hiera('gbl_prcs_pstools.remoteadminuserid')}"  
+  enableppmagent: "%{hiera('gbl_prcs_pstools.enableppmagent')}"  
+  dbflags: "%{hiera('gbl_prcs_pstools.dbflags')}"  
+
+projprd_prcs_psdstsrv:
+  mininstances: "%{hiera('gbl_prcs_psdstsrv.mininstances')}"  
+  maxinstances: "%{hiera('gbl_prcs_psdstsrv.maxinstances')}"  
+
+projprd_prcs_psaesrv:
+  maxinstances: "%{hiera('gbl_prcs_psaesrv.maxinstances')}"  
+  recyclecount: "%{hiera('gbl_prcs_psaesrv.recyclecount')}"  
+  allowed_consec_service_failures: "%{hiera('gbl_prcs_psaesrv.allowed_consec_service_failures')}"  
+
+projprd_prcs_ps_location:
+  ps_home: "/psoft/pt/ps_home8.58.08"
+  ps_app_home: "/psoft/hcm/projprd"
+  ps_config_home: "/pscfghome/home/psadmin2/projprd"
+  ps_custom_home: "/psoft/hcm/proj/projprd"

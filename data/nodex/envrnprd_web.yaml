@@ -1,0 +1,31 @@
+projprd_environmentname: projprd
+  
+projprd_webadminserver:
+  webadminserverhost: poeldapm01.company.com
+  webadmindomainname: PROJPRD1_1
+  webadminservertype: https
+  webadminserverhttp: "14000"
+  webadminserverhttps: "14001"
+  webadminloginid: projsystem
+  intgatewayid: projadmin
+  websitename: PROJPRD
+  psserver: "poeldapm01.company.com:20000"
+  all_pia_names: 'PIA12,PIA13'
+  total_pia_count: 3
+
+projprd_web_pwd_attrib: 
+  piaprivatekeypswd: "U2FsdxxxxxxxxxxxxhLl6SA6nSaTfh4IIRPB0/zfxIDC"
+  pia_trust_keystore_pswd: "U2Fsdxxxxxxxxxx8oxDuL7VzQy"
+  pia_iden_keystorepswd: "U2Fsdxxxxxxxxxxxxxxxy"
+  intgatewaypwd:  "U2FxxxxxxxxxxxTthrtc="
+  appsrvdomconnpwd: "U2Fxxxxxxxxxxhrtc="
+  webadminloginpwd: "U2xxxxxxxxxxxhrtc="
+  webProfuserpwd: "U2Fxxxxxxxxxxxxxxrtc="
+
+
+projprd_web_location:
+  ps_sslkey_basedir: "/psoft/psoft_scripts/utils/puppet_code/proj_psadmin/proj_server_keys"
+  ps_home: "/psoft/pt/ps_home8.58.08"
+  ps_app_home: "/psoft/hcm/projprd"
+  ps_config_home: "/pscfghome/home/psadmin2/projprd"
+  ps_custom_home: "/psoft/hcm/proj/projprd"

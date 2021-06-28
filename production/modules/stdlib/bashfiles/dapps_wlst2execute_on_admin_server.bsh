@@ -1,0 +1,115 @@
+#!/bin/bash
+#------------------------------------------------------------------
+# File Name       :  dapps_managedsrvr_admin.bsh.bsh
+# File Type       : bash
+# Created on      : MAR-14-2018
+# comments        : PS webserver  start/stop/status scripts
+# step to do
+#------------------------------------------------------------------
+#
+
+PRG_NAME=$0
+PS_ENV=dappsstg
+
+#---------------------------------------------------------------------
+# Function usage  will give help
+#---------------------------------------------------------------------
+function Usage
+{
+   echo ""
+   echo " Usage : $0 PYTHON_BIN_LOC PYTHON_SCR_LOC PS_CFG_HME PROG_NAME DOMAIN_NAME MNGED_SRVR_NME WEB_ADMIN_SRVR_HOST PORT_NUM ADMIN_ID ADMIN_PWD"
+   echo ""
+   echo ""
+   echo ""
+   echo " Example : $ $0 PYTHON_BIN_LOC PYTHON_SCRIPTS_LOC /pscfghome/home/psadmin2/dappsstg PROG_NAME DAPPSSTG1_2 PIA2 WEB_ADMIN_SRVR_HOST PORT_NUM ADMIN_ID PWD" 
+   echo " Example : $ $0 PYTHON_BIN_LOC PYTHON_SCRIPTS_LOC /pscfghome/home/psadmin2/dappsstg PROG_NAME  DAPPSPRD3_2 PIA7 WEB_ADMIN_SRVR_HOST PORT_NUM ADMIN_ID PWD"
+   echo " "
+}
+#
+#
+#---------------------------------------------------------------------
+# Function verify_notnull  will identify  not null parameter
+#---------------------------------------------------------------------
+#
+function verify_notnull ()
+{
+if test -z "$1";
+then
+   echo
+   echo "Error : $2 value not Specified !"
+   echo
+   Usage
+   exit 1
+fi
+}
+#
+#
+#
+##########################################################
+# Function s_upper  Returns input string in upper case
+#########################################################
+function s_upper
+{
+ echo $@ | tr '[a-z]' '[A-Z]'
+}
+#
+#
+#########################################################
+function setval_ifnull ()
+{
+if test -z "$1";
+then
+
+eval "$2=\"$3\""
+
+fi
+}
+#
+#
+#---------------------------------------------------------------------
+# Main Code Starts Here
+#---------------------------------------------------------------------
+PYTHON_BIN_LOC=$1
+PYTHON_SCR_LOC=$2
+PS_CFG_HME=$3
+PROG_NAME=$4
+DOMAIN_NAME=$5
+MNGED_SRVR_NME=$6
+WEB_ADMIN_SRVR_HOST=$7
+PORT_NUM=$8
+ADMIN_ID=$9
+ADMIN_PWD=$10
+
+verify_notnull "$PYTHON_BIN_LOC"  "PYTHON_BIN_LOC"
+verify_notnull "$PYTHON_SCR_LOC"  "PYTHON_SCR_LOC"
+verify_notnull "$PS_CFG_HME"  "PS_CFG_HME"
+verify_notnull "$PROG_NAME"  "PROG_NAME"
+verify_notnull "$DOMAIN_NAME"  "DOMAIN_NAME"
+verify_notnull "$MNGED_SRVR_NME"  "MNGED_SRVR_NME"
+
+verify_notnull "$WEB_ADMIN_SRVR_HOST"  "WEB_ADMIN_SRVR_HOST"
+verify_notnull "$PORT_NUM"  "PORT_NUM"
+
+verify_notnull "$ADMIN_ID"  "ADMIN_ID"
+verify_notnull "$ADMIN_PWD"  "ADMIN_PWD"
+
+
+source ${PS_CFG_HME}/webserv/${DOMAIN_NAME}/bin/setEnv.sh
+PATH=$PYTHON_BIN_LOC:$PATH
+export PATH
+
+${JAVA_HOME}/bin/java   \
+        -Dweblogic.security.TrustKeyStore=CustomTrust \
+        -Dweblogic.security.CustomTrustKeyStoreFileName=${PS_CFG_HME}/webserv/${DOMAIN_NAME}/piaconfig/keystore/pskey \
+        -Dweblogic.security.CustomTrustKeyStoreType=jks \
+        -Dweblogic.security.SSL.ignoreHostnameVerification=true weblogic.WLST ${PROG_NAME} $WEB_ADMIN_SRVR_HOST \
+                                   $PORT_NUM $ADMIN_ID "$ADMIN_PWD" 
+ERRORLEVEL=$?
+echo $ERRORLEVEL
+
+#---------------------------------------------------------------------
+# Main Code END Here
+#---------------------------------------------------------------------
+
+exit $ERRORLEVEL
+

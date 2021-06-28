@@ -1,0 +1,6 @@
+#!/bin/bash
+
+NRML_STR=$1
+DECRP_STR=`/bin/echo "${NRML_STR}" | /usr/bin/openssl enc -aes-256-cbc -a -d -salt -pass pass:dapps2013`
+echo -n "$DECRP_STR"
+

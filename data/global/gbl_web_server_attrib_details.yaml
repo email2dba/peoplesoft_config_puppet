@@ -1,0 +1,27 @@
+gblweb_lockoutuser:
+  lockoutuserduration: '15'
+  lockoutuserresetdur: '15'
+  lockoutuserthreshold: '3'
+
+other_web_attrib:
+  authenticationtokendomain: .company.com
+  reportrepositorypath: /psrpt/psreports
+  defltconfigfile: deflcfgvalues.cfg
+  pythonbinpath: /psdump/software/pt858_03/setup/python/bin
+  weblogicserverhomedir: /apps/mwhome/psoft/pt/bea
+
+gblweb_profile_attrib:
+  webprofuserid: PTWEBSERVER
+  webprofile: PROD
+
+gblweb_location:
+  ps_home: "/psoft/pt/ps_home8.58.08"
+  ps_app_home: "/psoft/hcm/projfld"
+  ps_config_home: "/pscfghome/home/psadmin2/projfld"
+  ps_custom_home: "/psoft/hcm/proj/projfld"
+
+gblweb_scripts_file_location:
+   psft_env_sh_location: "/psoft/psoft_scripts/utils"
+   pythonbinpath: /psdump/software/pt858_03/setup/python/bin
+   bash_file_location: "/psoft/psoft_scripts/utils/puppet_code/proj_psadmin/production/modules/stdlib/bashfiles"
+   python_file_location: "/psoft/psoft_scripts/utils/puppet_code/proj_psadmin/production/modules/stdlib/python_source"

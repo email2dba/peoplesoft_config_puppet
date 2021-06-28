@@ -1,0 +1,79 @@
+#!/bin/bash
+#------------------------------------------------------------------
+# File Name       : dapps_startweblogicadmin.bsh
+# File Type       : bash
+# Created on      : MAR-23-2021
+# comments        : It should valled from getter method.
+# step to do
+# ------------------------------------------------------------------
+#
+#
+PRG_NAME=$0
+ECHO=/bin/echo 
+SED=/bin/sed
+TR=/usr/bin/tr
+SLEEP=/bin/sleep
+#
+#
+#########################################################
+function Usage
+{
+   ${ECHO} ""
+   ${ECHO} " Usage : $0 PS_CFG_HOME and DOMAIN_NAME ACTN_MODE   "
+   ${ECHO} ""
+   ${ECHO} "ACTN_MODE willbe start|stop|status"
+}
+#
+#########################################################
+#
+#
+function verify_notnull ()
+{
+if test -z "$1";
+then
+   ${ECHO}
+   ${ECHO} "Error : $2 value not Specified !"
+   ${ECHO}
+   Usage
+   exit 1
+fi
+}
+
+#########################################################
+function setval_ifnull ()
+{
+if test -z "$1";
+then
+eval "$2=\"$3\""
+fi
+}
+#
+#########################################################
+#
+PRG_NAME=$0 
+
+PS_CFG_HOME=$1
+DOMAIN_NAME=$2
+ACTN_MODE=$3
+#--------------------------------------------------------
+verify_notnull "$PS_CFG_HOME" "PS_CFG_HOME"
+verify_notnull "$DOMAIN_NAME" "DOMAIN_NAME" 
+
+verify_notnull "$ACTN_MODE" "ACTN_MODE"
+
+#--------------------------------------------------------
+source ${PS_CFG_HOME}/webserv/${DOMAIN_NAME}/bin/setEnv.sh  
+
+#--------------------------------------------------------
+
+if [[ ${ACTN_MODE} == "start" ]]; then
+echo "start_stop_web_admin_server.bsh calling startWebLogicAdmin.sh "
+${PS_CFG_HOME}/webserv/${DOMAIN_NAME}/bin/startWebLogicAdmin.sh 
+fi
+#--------------------------------------------------------
+if [[ ${ACTN_MODE} == "stop" ]]; then
+echo "start_stop_web_admin_server.bsh calling stopWebLogic.sh "
+${PS_CFG_HOME}/webserv/${DOMAIN_NAME}/bin/stopWebLogic.sh
+fi
+#--------------------------------------------------------
+

@@ -1,0 +1,148 @@
+#!/bin/bash 
+
+#------------------------------------------------------------------
+# File Name       : psadmin_app_server_creation.bsh  
+# File Type       : bash
+# Created on      : MAR-17-2021
+# comments        : It should valled from getter method. 
+# step to do
+# ------------------------------------------------------------------
+#
+# 
+PRG_NAME=$0
+ECHO=/bin/echo
+SED=/bin/sed
+TR=/usr/bin/tr
+
+#
+#########################################################
+function Usage
+{
+   echo ""
+   echo " Usage : $0 PSFT_ENV_SH_LOCN ENV_NAME PS_SERV_NME TEMPLATE_SIZE STARTUP_ATTRIB_STR PORT_ATTRIB_STR    "
+   echo ""
+   echo " PSFT_ENV_SH_LOCN  (not null )  psft_env_sh location . We must have ps_unset_config.sh and psconfig.sh files in this dir "
+   echo " ENV_NAME(not null )  "
+   echo " SERV_NME(not null )  "
+   echo " TEMPLATE_SIZE      (not null ) : values will be small medium or large "
+   echo " STARTUP_ATTRIB_STR (not null ) : Example DPOEMDEV%ORACLE%BCAPPSRV%APPSRVBC1%DPOEMDEV"
+   echo " PORT_ATTRIB_STR    (not null ) : Example 17100%30100%9100"
+   echo "" 
+   echo "" 
+   echo " Example :  $ $0  \"/psoft/pt/pt858\" dappsstg  DAPPSSTG1_1 medium "
+   echo " Example :  $ $0  \"/psoft/pt/pt858\" dappsstg  DAPPSSTG1_1 large  DPOEMDEV%ORACLE%BCAPPSRV%APPSRVBC1%DPOEMDEV 17100%30100%9100  "
+   echo ""
+}
+#
+#########################################################
+#
+#########################################################
+#
+function verify_notnull ()
+{
+if test -z "$1";
+then
+   echo
+   echo "Error : $2 value not Specified !"
+   echo
+   Usage
+   exit 1
+fi
+}
+
+#########################################################
+function setval_ifnull ()
+{
+if test -z "$1";
+then
+
+#p_tmp=\$"$2"
+#echo "mahen p_tmp = $p_tmp "
+#p_tmp2=`eval "expr \"$p_tmp\" "`
+#echo $2=$p_tmp2
+
+eval "$2=\"$3\""
+
+#echo "NOW $2"
+fi
+}
+#
+#########################################################
+#
+#
+wrdcnt=/usr/bin/wc
+CAT=/bin/cat
+AWK=/bin/awk
+HEAD=/usr/bin/head
+TAIL=/usr/bin/tail
+EXPR=/usr/bin/expr
+#
+#
+PRG_NAME=$0
+PSFT_ENV_SH_LOCN=$1
+ENV_NAME=$2
+PS_SERV_NME=$3 
+TEMPLATE_SIZE=$4
+STARTUP_ATTRIB_STR=$5  
+PORT_ATTRIB_STR=$6   
+ 
+ 
+verify_notnull "$PSFT_ENV_SH_LOCN" "PSFT_ENV_SH_LOCN"  
+verify_notnull "$ENV_NAME"  "ENV_NAME"  
+verify_notnull "$PS_SERV_NME"  "PS_SERV_NME"
+
+verify_notnull "$TEMPLATE_SIZE"  "TEMPLATE_SIZE"
+verify_notnull "$STARTUP_ATTRIB_STR"  "STARTUP_ATTRIB_STR"
+verify_notnull "$PORT_ATTRIB_STR"  "PORT_ATTRIB_STR"
+  
+export PS_ENV=$ENV_NAME; 
+PS_ENV=$ENV_NAME
+export PS_ENV
+
+echo "BEFORE  INVOKING  ${PSFT_ENV_SH_LOCN}/psconfig858.sh "
+echo "PS_HOME      = ${PS_HOME} "
+echo "PS_APP_HOME  = ${PS_APP_HOME} "
+echo "PS_LIBPATH   = $PS_LIBPATH "
+echo "PS_CFG_HOME  = $PS_CFG_HOME "
+echo "PS_APP_HOME  = $PS_APP_HOME "
+echo "PS_CUST_HOME = $PS_CUST_HOME "
+echo "JAVA_HOME    = $JAVA_HOME "
+echo "TUXDIR       = $TUXDIR "
+echo "TUX_HOME     = $TUX_HOME "
+echo "COB_HOME     = $COB_HOME "
+echo "ORACLE_HOME  = $ORACLE_HOME "
+echo "PATH         = $PATH "
+echo "LD_LIBRARY_PATH = $LD_LIBRARY_PATH "
+
+echo "====================================================================================== "
+
+
+##.  ${PSFT_ENV_SH_LOCN}/psft_env4dappspuppet.sh
+#.  /apps/mwhome/psoft/pt/psft_env.sh
+
+unset IS_PS_PLT
+
+##. /apps/mwhome/psoft/pt/psft_env.sh 
+
+.  /psoft/pt/psft_env.sh
+
+echo "AFTER INVOKING ${PSFT_ENV_SH_LOCN}/psconfig858.sh "
+echo "PS_HOME      = ${PS_HOME} "
+echo "PS_APP_HOME  = ${PS_APP_HOME} "
+echo "PS_LIBPATH   = $PS_LIBPATH "
+echo "PS_CFG_HOME  = $PS_CFG_HOME "
+echo "PS_APP_HOME  = $PS_APP_HOME "
+echo "PS_CUST_HOME = $PS_CUST_HOME "
+echo "JAVA_HOME    = $JAVA_HOME "
+echo "TUXDIR       = $TUXDIR "
+echo "TUX_HOME     = $TUX_HOME "
+echo "COB_HOME     = $COB_HOME "
+echo "ORACLE_HOME  = ORACLE_HOME "
+echo "PATH         = $PATH "
+echo "LD_LIBRARY_PATH = $LD_LIBRARY_PATH "
+
+echo "====================================================================================== "
+
+
+${PS_HOME}/bin/psadmin -c create  -d ${PS_SERV_NME} -t $TEMPLATE_SIZE -s "${STARTUP_ATTRIB_STR}" -p "${PORT_ATTRIB_STR}"
+ 

@@ -1,0 +1,52 @@
+
+projprd_startup_attrib:
+  dbname: PROJPRD
+  dbtype: "%{hiera('gbl_startup_attrib.dbtype')}"
+  userid: "%{hiera('gbl_startup_attrib.userid')}"
+  connectid: "%{hiera('gbl_startup_attrib.connectid')}"
+
+projprd_pwd_attrib:
+  pwd_domainconnectionpwd: "Uxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx4="
+  pwd_userpswd: "U2xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxc="
+  pwd_connectpswd: "Uxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx="
+
+projprd_msln_attrib: 
+  msln_encryption: "%{hiera('gbl_msln_attrib.msln_encryption')}"
+  msln_template: large
+  msln_dboptions_enabledbmonitoring: "%{hiera('gbl_msln_attrib.msln_dboptions_enabledbmonitoring')}"
+
+projprd_domain_attrib:
+  addtopath: "%{hiera('gbl_domain_attrib.addtopath')}" 
+  allowdynamicchanges: "%{hiera('gbl_domain_attrib.allowdynamicchanges')}" 
+
+projprd_psappsrv_attrib: 
+  maxfetchsize: "%{hiera('gbl_psappsrvattrib.maxfetchsize')}" 
+  maxinstances: "%{hiera('gbl_psappsrvattrib.maxinstances')}" 
+  mininstances: "%{hiera('gbl_psappsrvattrib.mininstances')}" 
+ 
+projprd_proccess: 
+  pssamsrv_mininstances: "%{hiera('gbl_proccess.pssamsrv_mininstances')}"
+  pssamsrv_maxinstances: "%{hiera('gbl_proccess.pssamsrv_maxinstances')}"
+  psqcksrv_mininstances: "%{hiera('gbl_proccess.psqcksrv_mininstances')}"
+  psqcksrv_maxinstances: "%{hiera('gbl_proccess.psqcksrv_maxinstances')}"
+  psqrysrv_mininstances: "%{hiera('gbl_proccess.psmsghnd_maxinstances')}"
+  psqrysrv_maxinstances: "%{hiera('gbl_proccess.psmsghnd_maxinstances')}"
+  psmsghnd_mininstances: "%{hiera('gbl_proccess.psmsghnd_maxinstances')}"
+  psmsghnd_maxinstances: "%{hiera('gbl_proccess.psmsghnd_maxinstances')}"
+
+projprd_smtp:
+  smtpserver: "%{hiera('gbl_smtp.smtpserver')}"
+  smtpport: "%{hiera('gbl_smtp.smtpport')}"
+  smtpsender: "%{hiera('gbl_smtp.smtpsender')}"
+  smtpsourcemachine: "%{hiera('gbl_smtp_smtpsourcemachine')}"
+
+projprd_pstools_attrib:
+  dbflags: "%{hiera('gbl_pstools_attrib.dbflags')}"
+  enableppmagent: "%{hiera('gbl_pstools_attrib.enableppmagent')}"
+
+projprd_ps_location:
+  ps_home: "%{hiera('gbl_ps_location.ps_home')}"
+  ps_app_home: "/psoft/hcm/projprd"
+  ps_config_home: "/pscfghome/home/psadmin2/projprd"
+  ps_custom_home: "/psoft/hcm/proj/projprd"
+

@@ -1,0 +1,465 @@
+##
+## db_monitoring
+#:
+##
+require 'fileutils'
+require 'open3'
+
+Puppet::Type.type(:dapps_config_app_server).provide(:prv001_dapps_config_app_server) do
+
+   commands :dapps_psadmin => 'echo'
+   commands :getlist       => 'grep'
+   commands :fileremove    => 'rm'
+
+   mk_resource_methods
+
+   #--------------------------------------------------
+   #get_value4key()
+   #--------------------------------------------------
+   def get_value4key(keyname, key_val_arr )
+     for keyval_str in key_val_arr do
+        attrib_arr = keyval_str.split("=")
+        if attrib_arr[0] == keyname
+             return attrib_arr[1]
+        end
+      end
+      return "zzz"
+   end
+   #--------------------------------------------------
+   #get_value4keyx2()
+   #--------------------------------------------------
+   def get_value4key2(keyname, key_val_arr )
+     #key_val_arr.length()
+     last_char="x"
+     for keyval_str in key_val_arr do
+        Puppet.debug(" keyval_str : #{keyval_str}")
+        strlen = keyval_str.size
+        lastposch= keyval_str[-1..-1]
+
+        Puppet.debug(" lastposch : #{lastposch}")
+        if keyval_str[-1..-1] == "="
+          last_char="z"
+        end
+        attrib_arr = keyval_str.split("=")
+        if attrib_arr[0] == keyname
+          if last_char == "x"
+             Puppet.debug(" RETURN   keyval_str : #{keyval_str}")
+             return attrib_arr[1]
+          else
+             retstr = attrib_arr[1] + "="
+             Puppet.debug(" RETURN 2  keyval_str : #{keyval_str}")
+             return retstr
+          end
+        end
+      end
+      return "zzz"
+   end
+   
+   #--------------------------------------------------
+   # get_decrypt_str(encr_string)
+   #--------------------------------------------------
+   def get_decrypt_str(encr_string)
+       lcl_bash_fle_location  =  get_value4key("bash_file_location",  resource[:scripts_location] )
+
+       env_action_cmd  = lcl_bash_fle_location + "/get_decrypt_str.bsh \"" +  encr_string + "\" "
+       command_output = execute_command(env_action_cmd, true)
+       Puppet.debug(" get_decrypt_str output: #{command_output}")
+       command_output
+   end
+
+
+
+   #--------------------------------------------------
+   #make_startup_attrib_str()
+   #--------------------------------------------------
+   def make_startup_attrib_str()
+       lcl_startup_attr_arr =  resource[:startup_attrib]
+       lcl_domain_attr_arr  =  resource[:domain_attrib]
+       lcl_pwd_attr_arr     =  resource[:pwd_attrib]
+
+       #DBNAME  DBTYPE
+       out_str = get_value4key("dbname", lcl_startup_attr_arr) + "%" +  get_value4key("dbtype", lcl_startup_attr_arr)
+       #OPRID  OPRPWD
+       out_str += "%" + get_value4key("userid", lcl_startup_attr_arr) + "%" + get_decrypt_str(get_value4key2("pwd_userpswd", lcl_pwd_attr_arr))
+       #DomainID  Add_to_path
+
+       out_str += "%" + get_value4key("domainid", lcl_domain_attr_arr) +  "%"  + get_value4key("addtopath", lcl_domain_attr_arr)
+
+       #DBConnectID  DB_CNCT_PASSWORD
+       attrib_arr = lcl_pwd_attr_arr[2].split("=")
+       out_str += "%"+ get_value4key("connectid", lcl_startup_attr_arr) + "%" +  get_decrypt_str(get_value4key2("pwd_connectpswd", lcl_pwd_attr_arr))
+
+       #servername  domain connection pwd
+       out_str += "%"+"_____" + "%"+ get_decrypt_str( get_value4key2("pwd_domainconnectionpwd", lcl_pwd_attr_arr))
+
+       #SEC_principal_password
+       out_str += "%"+"ENCRYPT"
+       Puppet.debug(" make_startup_attrib_str: #{out_str}")
+       out_str
+   end
+
+
+   #------------------------------------
+   #make_config_attrib_str()
+   #--------------------------------------------------
+
+   def make_config_attrib_str()
+
+        lcl_startup_attr_arr  =  resource[:startup_attrib]
+        lcl_domain_attr_arr   =  resource[:domain_attrib]
+        lcl_pwd_attr_arr      =  resource[:pwd_attrib]
+        lcl_psappsrv_attr_arr =  resource[:psappsrv_attrib]
+        lcl_port_attr_arr =  resource[:listeners_port]
+
+        out_str = " "
+        #[Domain Settings] Domain ID
+        out_str = "  \"[Domain Settings]/Domain ID=" +  get_value4key("domainid", lcl_domain_attr_arr) + "#"
+
+        #[Domain Settings] Allow Dynamic Changes
+        out_str += "[Domain Settings]/Allow Dynamic Changes=" + get_value4key("allowdynamicchanges", lcl_domain_attr_arr ) + "#"
+
+        #PSAPPSRV min instances
+        #out_str += "PSAPPSRV]/Min Insances=" + get_value4key("mininstances", lcl_psappsrv_attr_arr) + "#"
+
+        #PSAPPSRV max instances
+        #out_str += "[PSAPPSRV]/Max Insances=" + get_value4key("maxinstances", lcl_psappsrv_attr_arr) + "#"
+
+        #PSAPPSRV Max Fetch Size
+        #out_str += "[PSAPPSRV]/Max Fetch Size=" + get_value4key("maxfetchsize", lcl_psappsrv_attr_arr) + "#"
+
+        #JOLT Listener
+        ##commented by deena out_str += "[JOLT Listener]/Port=" + get_value4key("joltlistener_jslport", lcl_port_attr_arr) + "#"
+
+        #JOLT Address
+        out_str += "[JOLT Listener]/Address=" + "0.0.0.0"+ "#"
+
+        #JOLT Min Handlers
+        out_str += "[JOLT Listener]/Min Handlers=" + get_value4key("minhandlers",  resource[:jolt_attrib]  ) + "#" 
+
+        #JOLT Max Handlers
+        out_str += "[JOLT Listener]/Max Handlers=" + get_value4key("maxhandlers",  resource[:jolt_attrib]  ) + "#" 
+
+        #[Workstation Listener]Min Handlers
+        out_str += "[Workstation Listener]/Min Handlers=" + get_value4key("minhandlers",  resource[:workstation_attrib]  ) + "#" 
+
+        #[Workstation Listener] Miax Handlers
+        out_str += "[Workstation Listener]/Max Handlers=" + get_value4key("maxhandlers",  resource[:workstation_attrib]  ) + "#" 
+
+        #PSTOOLS DbFlags
+        out_str += "[PSTOOLS]/DbFlags=" + get_value4key("dbflags", resource[:pstools_attrib] ) + "#"
+        #PSTOOLS :EnablePPM Agent=1
+        out_str += "[PSTOOLS]/EnablePPM Agent=" + get_value4key("enableppmagent", resource[:pstools_attrib] ) + "#"
+
+        #[PSSAMSRV] Min Instances
+        out_str += "[PSSAMSRV]/Min Instances=" + get_value4key("pssamsrv_mininstances", resource[:procs_attrib] ) + "#"
+        #[PSSAMSRV] Min Instances
+        out_str += "[PSSAMSRV]/Max Instances=" + get_value4key("pssamsrv_maxinstances", resource[:procs_attrib] ) + "#"
+
+        #[PSQCKSRV] Min Instances
+        out_str += "[PSQCKSRV]/Min Instances=" + get_value4key("psqcksrv_mininstances", resource[:procs_attrib] ) + "#"
+        #[PSQCKSRV] Min Instances
+        out_str += "[PSQCKSRV]/Max Instances=" + get_value4key("psqcksrv_maxinstances", resource[:procs_attrib] ) + "#"
+
+        #[PSQRYSRV] Min Instances
+        out_str += "[PSQRYSRV]/Min Instances=" + get_value4key("mininstances", resource[:psqrysrv_attrib] ) + "#"
+        #[PSQCKSRV] Max Instances
+        out_str += "[PSQRYSRV]/Max Instances=" + get_value4key("maxinstances", resource[:psqrysrv_attrib] ) + "#"
+        #[PSQCKSRV] JVM Options
+        out_str += "[PSQRYSRV]/JavaVM Options=" + get_value4key("javavmoptions", resource[:psqrysrv_attrib] ) + "#"
+
+
+        #[PSRENSRV]  default_http_port
+        out_str += "[PSRENSRV]/default_http_port=" + get_value4key("default_http_port", resource[:psrensrv_attrib] ) + "#"
+        #[PSRENSRV]   default_https_port
+        out_str += "[PSRENSRV]/default_https_port=" + get_value4key("default_https_port", resource[:psrensrv_attrib] ) + "#"
+        #[PSRENSRV]   default_auth_token
+        out_str += "[PSRENSRV]/default_auth_token=" + get_value4key("default_auth_token", resource[:psrensrv_attrib] ) + "#"
+
+        #[Database Options] EnableDBMonitoring
+        out_str += "[Database Options]/EnableDBMonitoring=" + get_value4key("msln_dboptions_enabledbmonitoring", resource[:msln_attrib] ) + "#"
+
+        #[SMTP Settings]  SMTPServer
+        out_str += "[SMTP Settings]/SMTPServer=" + get_value4key("smtpserver", resource[:smtp_attrib] ) + "#"
+        #[SMTP Settings] SMTPPort 
+        out_str += "[SMTP Settings]/SMTPPort=" + get_value4key("smtpport", resource[:smtp_attrib] ) + "#"
+
+        #[SMTP Settings]  SMTPSender
+        out_str += "[SMTP Settings]/SMTPSender=" + get_value4key("smtpsender", resource[:smtp_attrib] ) + "#"
+        #[SMTP Settings]  SMTPSourceMachine
+        out_str += "[SMTP Settings]/SMTPSourceMachine=" + get_value4key("smtpsourcemachine", resource[:smtp_attrib] ) 
+       
+        if get_value4key("smtpsourcemachine", resource[:smtp_attrib] ) != "zzz"
+           out_str += "#"
+           #[PSSUBHND_DFLT]  Min Instances
+           out_str += "[PSSUBHND_DFLT]/Min Instances=" + get_value4key("mininstances", resource[:pssubhnd_cnfsub_attrib] ) + "#"
+           #[PSSUBHND_DFLT]  Max Instances
+           out_str += "[PSSUBHND_DFLT]/Max Instances=" + get_value4key("maxinstances", resource[:pssubhnd_cnfsub_attrib] ) + "#"
+           #[PSSUBHND_DFLT]  Service Timeout
+           out_str += "[PSSUBHND_DFLT]/Service Timeout=" + get_value4key("servicetimeout", resource[:pssubhnd_cnfsub_attrib] ) + "#"
+           #[PSSUBHND_DFLT]  Recycle Count
+           out_str += "[PSSUBHND_DFLT]/Recycle Count=" + get_value4key("recyclecount", resource[:pssubhnd_cnfsub_attrib] ) + "#"
+           #[PSSUBHND_DFLT]  Allowed Consec Service Failures
+           out_str += "[PSSUBHND_DFLT]/Allowed Consec Service Failures="+get_value4key("allowedconsecservicefailures",resource[:pssubhnd_cnfsub_attrib] ) + "#"
+           #[PSSUBHND_DFLT]  Max Retries
+           out_str += "[PSSUBHND_DFLT]/Max Retries=" + get_value4key("maxretries", resource[:pssubhnd_cnfsub_attrib] )
+        end
+        out_str += "\" "
+
+        Puppet.debug("  make_config_attrib_str: #{out_str}")
+        out_str
+   end
+
+   #--------------------------------------------------
+   # make_port_attrib_str
+   #--------------------------------------------------
+   def make_port_attrib_str()
+      lcl_port_attr_arr      =  resource[:listeners_port]
+      #WSL Port
+      out_str =  get_value4key("workstation_listenerport", lcl_port_attr_arr)  + "%"
+      #JSL Port
+      out_str +=  get_value4key("joltlistener_jslport", lcl_port_attr_arr) + "%"
+
+      #JRAD Port
+      out_str +=  get_value4key("joltrelayadapter_listenerport", lcl_port_attr_arr)
+      Puppet.debug("  make_port_attrib_str: #{out_str}")
+      out_str
+   end
+
+   #--------------------------------------------------
+   # make_feature_attrib_str
+   #--------------------------------------------------
+   def make_feature_attrib_str()
+      out_str =  " \""+ resource[:feature_settings_str] + "\""
+      Puppet.debug(" make_feature_attrib_str: #{out_str}")
+      out_str
+   end
+   #--------------------------------------------------
+   # create_resource
+   #--------------------------------------------------
+
+   def create_resource
+       lcl_bash_fle_location  =  get_value4key("bash_file_location",  resource[:scripts_location] )
+       lcl_startup_attr_arr   =  resource[:startup_attrib]
+       lcl_domain_attr_arr    =  resource[:domain_attrib]
+       lcl_ps_location_arr    =  resource[:ps_location]
+
+       envir_name =  get_value4key("dbname", lcl_startup_attr_arr).downcase
+       domain_name =  get_value4key("domainid", lcl_domain_attr_arr).upcase
+
+       env_action_cmd  = lcl_bash_fle_location + "/psadmin_app_server_creation.bsh  "
+       env_action_cmd += " " + get_value4key("ps_home", lcl_ps_location_arr)  +" " + envir_name
+       env_action_cmd += " " + domain_name
+       env_action_cmd += " " + get_value4key("msln_template", resource[:msln_attrib] )
+       env_action_cmd += " " + make_startup_attrib_str()
+       env_action_cmd += " " + make_port_attrib_str()
+       command_output = execute_command(env_action_cmd, true)
+       Puppet.debug(" create_resource: #{command_output}")
+
+       command_output
+   end
+
+   #--------------------------------------------------
+   # psadmin_app_server_config_updation
+   #--------------------------------------------------
+   def add_update_resource_attrib
+       lcl_bash_fle_location  = get_value4key("bash_file_location",  resource[:scripts_location] )
+       lcl_startup_attr_arr   = resource[:startup_attrib]
+       lcl_domain_attr_arr    = resource[:domain_attrib]
+       lcl_ps_location_arr    = resource[:ps_location]
+
+       envir_name =  get_value4key("dbname", lcl_startup_attr_arr).downcase
+       domain_name =  get_value4key("domainid", lcl_domain_attr_arr).upcase
+
+       env_action_cmd  = lcl_bash_fle_location + "/psadmin_app_server_config_updation.bsh  "
+       env_action_cmd += " " +  get_value4key("ps_home", lcl_ps_location_arr) +" " + envir_name
+       env_action_cmd += " " + domain_name
+       env_action_cmd += " " + make_config_attrib_str()
+       env_action_cmd += " " + make_feature_attrib_str()
+       command_output = execute_command(env_action_cmd, true)
+       Puppet.debug(" add_update_resource_attrib: #{command_output}")
+       command_output
+   end
+
+   #--------------------------------------------------
+   # get_dbname_from_psappssrv_cfg_file
+   #--------------------------------------------------
+   def get_dbname_from_psappssrv_cfg_file
+     outstr = " "
+     begin
+     lcl_domain_attr_arr  =  resource[:domain_attrib]
+     domain_name =  get_value4key("domainid", lcl_domain_attr_arr).upcase
+     lps_app_srv_cfg_fle =   get_value4key("ps_config_home",  resource[:ps_location] )   + "/appserv/" + domain_name + "/psappsrv.cfg"
+     outstr = getlist(['-E', 'DBName', lps_app_srv_cfg_fle])
+     rescue Puppet::ExecutionFailure => e
+        Puppet.debug("errorin get list file  -> #{e.inspect}")
+        return nil
+     else
+     Puppet.debug("db_name found: #{outstr}")
+     end
+     Puppet.debug("END get_dbname_from_psappssrv_cfg_file: #{outstr}")
+     return outstr
+   end
+
+   #--------------------------------------------------
+   # execute_command
+   #--------------------------------------------------
+
+   def execute_command(command, mask_pwd = false)
+     Puppet.debug("Executing command: #{command}")
+     out_str = ''
+     error_str = ''
+     begin
+       Open3.popen3(command) do |stdin, out, err|
+         stdin.close
+         error_str = err.read
+         out_str = out.read
+         out_str = out_str + '' + error_str
+         if mask_pwd
+           Puppet.debug('Command executed successfully')
+         else
+           Puppet.debug("Command executed successfully output  #{out_str}, Error: #{error_str}")
+         end
+       end
+     rescue Exception => e
+          raise Puppet::ExecutionFailure, "Command execution failed, error: #{e.message} "
+     end
+     return out_str
+   end
+   #--------------------------------------------------
+   # psappsrv.cfg configFileExists
+   #--------------------------------------------------
+   def configFileExists
+      lcl_domain_attr_arr  =  resource[:domain_attrib]
+      domain_name =  get_value4key("domainid", lcl_domain_attr_arr).upcase
+      lps_app_srv_cfg_dir = get_value4key("ps_config_home", resource[:ps_location] )  + "/appserv/" +  domain_name
+
+      File.exist?(lps_app_srv_cfg_dir)
+   end
+   #--------------------------------------------------
+   # exists
+   #--------------------------------------------------
+
+   def exists?
+      Puppet.debug("Method : exists? ")
+      configFileExists()
+   end
+
+   #--------------------------------------------------
+   # destroy
+   #--------------------------------------------------
+
+   def destroy
+      Puppet.debug("begin: destroy ")
+      lcl_domain_attr_arr  =  resource[:domain_attrib]
+      domain_name =  get_value4key("domainid", lcl_domain_attr_arr).upcase
+      lps_app_srv_cfg_dir = get_value4key("ps_config_home", resource[:ps_location] )  + "/appserv/" +  domain_name
+
+      if File.exist?(lps_app_srv_cfg_dir)
+         Puppet.debug("Removing apps server domain directory: #{lps_app_srv_cfg_dir}")
+         FileUtils.rm_rf(lps_app_srv_cfg_dir)
+      end
+      @property_hash[:ensure] = :absent
+      ###@property_flush.clear
+      Puppet.debug("end: destroy ")
+   end
+
+
+   #--------------------------------------------------
+   # create
+   #--------------------------------------------------
+
+   def create
+    Puppet.debug("begin: create ")
+    if (configFileExists())
+      Puppet.debug("Method : CREATE method already executed in previous run ")
+    else
+      create_resource()
+    end
+    add_update_resource_attrib()
+    @property_hash[:ensure] = :present
+    @property_hash[:startup_attrib] = get_psconfig_attribute("[Startup]", "dbnamedbtypeuseridconnectid")
+    ##@property_hash[:startup_attrib] = get_psconfig_attribute()
+    Puppet.debug("end: create ")
+   end
+
+   #--------------------------------------------------
+   # get_psconfig_attribute to get startup_attrib
+   #--------------------------------------------------
+   def get_psconfig_attribute(groupid, groupattriblist)
+       Puppet.debug(" BEGIN get_psconfig_attribute: ")
+       lcl_bash_fle_location  =  get_value4key("bash_file_location",  resource[:scripts_location] )
+       lcl_startup_attr_arr   =  resource[:startup_attrib]
+       lcl_domain_attr_arr    =  resource[:domain_attrib]
+       lcl_ps_location_arr    =  resource[:ps_location]
+
+       envir_name =  get_value4key("dbname", lcl_startup_attr_arr).downcase
+       domain_name =  get_value4key("domainid", lcl_domain_attr_arr).upcase
+
+       env_action_cmd  = lcl_bash_fle_location + "/get_psconfig_attribute.bsh  "
+       env_action_cmd += " " + get_value4key("ps_config_home",  resource[:ps_location] ) +" " + envir_name
+       env_action_cmd += " app " + domain_name + " " + groupid + " " + groupattriblist
+       ##env_action_cmd += " [Startup] dbnamedbtypeuseridconnectid"
+       command_output = execute_command(env_action_cmd, true)
+       Puppet.debug(" END get_psconfig_attribute: #{command_output}")
+       out_attrib_arr = command_output.split(",") 
+       Puppet.debug(" END2 get_psconfig_attribute: #{out_attrib_arr}")
+
+       return out_attrib_arr
+   end
+
+   #--------------------------------------------------
+   # startup_attrib property Getter
+   #--------------------------------------------------
+
+   def startup_attrib
+      Puppet.debug("begin: startup_attrib property Getter ")
+      if (configFileExists())
+         get_psconfig_attribute("[Startup]", "dbnamedbtypeuseridconnectid")
+      end
+   end
+
+   #--------------------------------------------------
+   # startup_attrib property Setter
+   #--------------------------------------------------
+   def startup_attrib=(value)
+      Puppet.debug("begin startup_attrib property Setter ")
+      ##create_resource()
+      add_update_resource_attrib()
+      @property_hash[:startup_attrib] = get_psconfig_attribute("[Startup]", "dbnamedbtypeuseridconnectid")
+      Puppet.debug("End startup_attrib property Setter ")
+   end
+
+   #--------------------------------------------------
+   # listeners_port property Getter
+   #--------------------------------------------------
+
+   def listeners_port
+      Puppet.debug("begin: listeners_port property Getter ")
+      if (configFileExists)
+        portone = get_psconfig_attribute("\"[Workstation Listener]\"","port")
+        attrib_arr = portone[0].split("=")
+        portstr = "workstation_listenerport=" + attrib_arr[1] + ","   
+
+        portone = get_psconfig_attribute("\"[JOLT Listener]\"","port")
+        attrib_arr = portone[0].split("=")
+        portstr += "joltlistener_jslport=" + attrib_arr[1]  + "," 
+
+        portone = get_psconfig_attribute("\"[JOLT Relay Adapter]\"","listenerport" )
+        attrib_arr = portone[0].split("=")
+        portstr += "joltrelayadapter_listenerport=" + attrib_arr[1]  
+        portarr = portstr.split(",") 
+        Puppet.debug("end: listeners_port property Getter: : #{ portarr} ")
+      end 
+      portarr
+   end
+
+   #--------------------------------------------------
+   # listeners_port property Setter
+   #--------------------------------------------------
+   def listeners_port=(value)
+      Puppet.debug("begin listeners_port property Setter ")
+      ##create_resource()
+      ##add_update_resource_attrib()
+      Puppet.debug("end listeners_port property Setter ")
+   end
+end

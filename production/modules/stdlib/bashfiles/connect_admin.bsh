@@ -1,0 +1,105 @@
+#!/bin/bash
+#------------------------------------------------------------------
+# File Name       : connect_admin.bsh
+# File Type       : bash
+# Created on      : MAR-23-2021
+# Last updated by : company.com
+# comments        : PS web admin server status 
+# step to do
+#------------------------------------------------------------------
+#
+PRG_NAME=$0 
+#---------------------------------------------------------------------
+# Function usage  will give help
+#---------------------------------------------------------------------
+function Usage
+{
+   echo ""
+   echo " Usage : $0 PYTHON_BIN_LOC PYTHON_SCRIPTS_LOC PS_CFG_HOME DOMAIN_NAME  WEB_ADMIN_SRVR_HOST  PORT_NUM ADMIN_ID ADMIN_PWD"
+   echo ""
+   echo ""
+   echo ""
+   echo " Example : $ $0 PYTHON_BIN_LOC PYTHON_SCRIPTS_LOC /pscfghome/home/psadmin2/dappsprd  DAPPSPRD1_1 poeldapm01.bdc.ti.company.com 14001 "
+   echo ""
+   echo " Example : $ $0 PYTHON_BIN_LOC PYTHON_SCRIPTS_LOC /pscfghome/home/psadmin2/dappsstg  DAPPSSTG1_1 soeldapm01.bdc.ti.company.com 14071 "
+  echo " "
+}
+#
+#
+#---------------------------------------------------------------------
+# Function verify_notnull  will identify  not null parameter
+#---------------------------------------------------------------------
+#
+function verify_notnull ()
+{
+if test -z "$1";
+then
+   echo
+   echo "Error : $2 value not Specified !"
+   echo
+   Usage
+   exit 1
+fi
+}
+#
+#
+#
+##########################################################
+# Function s_upper  Returns input string in upper case
+#########################################################
+function s_upper
+{
+ echo $@ | tr '[a-z]' '[A-Z]'
+}
+#
+#
+#########################################################
+function setval_ifnull ()
+{
+if test -z "$1";
+then
+eval "$2=\"$3\""
+fi
+}
+#
+#
+#---------------------------------------------------------------------
+# Main Code Starts Here
+#---------------------------------------------------------------------
+PYTHON_BIN_LOC=$1 
+PYTHON_SCRIPTS_LOC=$2
+PS_CFG_HME=$3
+DOMAIN_NAME=$4
+WEB_ADMIN_SRVR_HOST=$5
+PORT_NUM=$6 
+ADMIN_ID=$7
+ADMIN_PWD="$8"
+
+verify_notnull "$PYTHON_BIN_LOC"  "PYTHON_BIN_LOC"
+verify_notnull "$PYTHON_SCRIPTS_LOC"  "PYTHON_SCRIPTS_LOC"
+verify_notnull "$PS_CFG_HME"  "PS_CFG_HME"
+verify_notnull "$DOMAIN_NAME"  "DOMAIN_NAME"
+verify_notnull "$WEB_ADMIN_SRVR_HOST"  "WEB_ADMIN_SRVR_HOST"
+verify_notnull "$PORT_NUM"  "PORT_NUM"   
+verify_notnull "$ADMIN_ID"  "ADMIN_ID"   
+verify_notnull "$ADMIN_PWD"  "ADMIN_PWD"   
+
+
+PATH=$PYTHON_BIN_LOC:$PATH
+export PATH
+PROG_NAME=${PYTHON_SCRIPTS_LOC}/find_web_admin_server_status.py 
+
+source ${PS_CFG_HME}/webserv/${DOMAIN_NAME}/bin/setEnv.sh
+
+${JAVA_HOME}/bin/java   \
+        -Dweblogic.security.TrustKeyStore=CustomTrust \
+        -Dweblogic.security.CustomTrustKeyStoreFileName=${PS_CFG_HME}/webserv/${DOMAIN_NAME}/piaconfig/keystore/pskey \
+        -Dweblogic.security.CustomTrustKeyStoreType=jks \
+        -Dweblogic.security.SSL.ignoreHostnameVerification=true weblogic.WLST  ${PROG_NAME} $WEB_ADMIN_SRVR_HOST $PORT_NUM $ADMIN_ID "$ADMIN_PWD"
+ERRORLEVEL=$?
+
+#---------------------------------------------------------------------
+# Main Code END Here
+#---------------------------------------------------------------------
+
+

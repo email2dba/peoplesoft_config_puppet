@@ -1,0 +1,78 @@
+
+projprd1_1_domain_attrib: 
+  domainid: PRD1_1
+  domainname: PROJPRD1_1
+  serverhost: poeldapm01.company.com
+
+projprd1_1_listeners_port: 
+  workstation_listenerport: 15000
+  joltlistener_jslport: 22000
+  joltrelayadapter_listenerport: 9100
+
+projprd1_1_psrensrv_attrib: 
+  default_http_port: 8002
+  default_https_port: 8003
+  default_auth_token: .company.com
+
+projprd1_1_jolt_attrib:
+  minhandlers: "9"
+  maxhandlers: "12"
+
+projprd1_1_workstation_attrib:
+  minhandlers: "5"
+  maxhandlers: "12"
+ 
+projprd1_1_psbrkdsp_dflt_attrib:
+  recyclecount: "zzz"
+
+projprd1_1_psbrkhnd_dflt_attrib:
+  maxinstances: "zzz"
+
+projprd1_1_pssubdsp_dflt_attrib:
+  recyclecount: "zzz"
+
+projprd1_1_pssubhnd_dflt_attrib:
+  maxinstances: "zzz"
+
+projprd1_1_pspubdsp_dflt_attrib:
+  recyclecount: "zzz"
+
+projprd1_1_pspubhnd_dflt_attrib:
+  maxinstances: "zzz"
+
+projprd1_1_psbrkdsp_cnfdsp_attrib:
+  recyclecount: "zzz"
+
+projprd1_1_psbrkhnd_cnfdsp_attrib:
+  maxinstances: "zzz"
+
+projprd1_1_pssubdsp_cnfsub_attrib:
+  recyclecount: "zzz"
+
+projprd1_1_pssubhnd_cnfsub_attrib:
+  maxinstances: "zzz"
+
+projprd1_1_psbrkdsp_mftdsp_attrib:
+  recyclecount: "zzz"
+
+projprd1_1_psbrkhnd_mftdsp_attrib:
+  maxinstances: "zzz"
+
+projprd1_1_pspubdsp_mftpub_attrib:
+  recyclecount: "zzz"
+
+projprd1_1_pspubhnd_mftpub_attrib:
+  maxinstances: "zzz"
+
+projprd1_1_psqrysrv_attrib:
+  mininstances: "%{hiera('gbl_psqrysrv_attrib.mininstances')}"
+  maxinstances: "%{hiera('gbl_psqrysrv_attrib.maxinstances')}"
+
+projprd1_1_psmonitorsrv_attrib:
+  javavmoptions: "%{hiera('gbl_psmonitorsrv_attrib.javavmoptions')}"
+
+projprd1_1_feature_str: "{PUBSUB}=No#"
+
+projprd1_1_smtp:
+  smtpsourcemachine: "poeldapm01.company.com"
+

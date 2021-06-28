@@ -1,0 +1,119 @@
+#!/bin/bash 
+
+#------------------------------------------------------------------
+# File Name       : psadmin_app_server_config_updation.bsh  
+# File Type       : bash
+# Created on      : MAR-17-2021
+# comments        : It should valled from getter method. 
+# step to do
+# ------------------------------------------------------------------
+#
+# 
+PRG_NAME=$0
+ECHO=/bin/echo
+SED=/bin/sed
+TR=/usr/bin/tr
+
+#
+#########################################################
+function Usage
+{
+   echo ""
+   echo " Usage : $0 PSFT_ENV_SH_LOCN ENV_NAME PS_SERV_NME CONFIG_ATTRIB_STR FEATURE_FLAGS_STR "
+   echo ""
+   echo " PSFT_ENV_SH_LOCN  (not null )  psft_env_sh location  . We must have ps_unset_config.sh and psconfig.sh files in this dir "
+   echo " ENV_NAME(not null )  "
+   echo " SERV_NME(not null )  " 
+   echo " CONFIG_ATTRIB_STR (not null ) : domain config settings  "
+   echo " FEATURE_FLAGS_STR  (not null ) : domain features  ON or OFF Flags"
+   echo "" 
+   echo "" 
+   echo " Example :  $ $0  \"/psoft/pt/pt858\" dappsstg  DAPPSSTG1_1 "
+   echo " Example :  $ $0  \"/psoft/pt/pt858\" dappsstg  DAPPSSTG1_1 \"[Domain Settings]/Domain ID=DPOEMDEV#[PSAPPSRV]/Min Instances=5\" {PUBSUB}=Yes/{PUBSUB}=Yes/{QUICKSRV}=Yes/{QUERYSRV}=Yes/{JOLT}=Yes"
+   echo ""
+}
+#
+#########################################################
+#
+#########################################################
+#
+function verify_notnull ()
+{
+if test -z "$1";
+then
+   echo
+   echo "Error : $2 value not Specified !"
+   echo
+   Usage
+   exit 1
+fi
+}
+
+#########################################################
+function setval_ifnull ()
+{
+if test -z "$1";
+then
+
+#p_tmp=\$"$2"
+#echo "mahen p_tmp = $p_tmp "
+#p_tmp2=`eval "expr \"$p_tmp\" "`
+#echo $2=$p_tmp2
+
+eval "$2=\"$3\""
+
+#echo "NOW $2"
+fi
+}
+#
+#########################################################
+#
+#
+wrdcnt=/usr/bin/wc
+CAT=/bin/cat
+AWK=/bin/awk
+HEAD=/usr/bin/head
+TAIL=/usr/bin/tail
+EXPR=/usr/bin/expr
+#
+#
+PRG_NAME=$0
+PSFT_ENV_SH_LOCN=$1
+ENV_NAME=$2
+PS_SERV_NME=$3  
+CONFIG_ATTRIB_STR=$4  
+FEATURE_FLAGS_STR=$5 
+ 
+ 
+verify_notnull "$PSFT_ENV_SH_LOCN" "PSFT_ENV_SH_LOCN"  
+verify_notnull "$ENV_NAME"  "ENV_NAME"  
+verify_notnull "$PS_SERV_NME"  "PS_SERV_NME"
+ 
+verify_notnull "$CONFIG_ATTRIB_STR"  "CONFIG_ATTRIB_STR"
+verify_notnull "$FEATURE_FLAGS_STR"  "FEATURE_FLAGS_STR"
+  
+export PS_ENV=$ENV_NAME; 
+##. ${PS_HOME}/ps_unset_config.bsh; 
+##. ${PS_HOME}/psconfig.sh
+
+
+PS_ENV=$ENV_NAME
+export PS_ENV
+
+
+##.  ${PSFT_ENV_SH_LOCN}/psft_env4dappspuppet.sh
+##.  /apps/mwhome/psoft/pt/psft_env.sh
+
+unset IS_PS_PLT
+
+echo "Before executing psadmin"
+echo "FEATURE_FLAGS_STR : ${FEATURE_FLAGS_STR} "
+
+FEATURE_FLAGS_STR1=${FEATURE_FLAGS_STR//#/%}
+
+##. /apps/mwhome/psoft/pt/psft_env.sh 
+.  /psoft/pt/psft_env.sh
+
+echo "==============================="
+${PS_HOME}/bin/psadmin -c configure -d ${PS_SERV_NME} -cfg "${CONFIG_ATTRIB_STR}" -u  "${FEATURE_FLAGS_STR1}"
+

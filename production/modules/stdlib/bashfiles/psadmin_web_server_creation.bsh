@@ -1,0 +1,199 @@
+#!/bin/bash
+#------------------------------------------------------------------
+# File Name       : psadmin_web_server_creation.bsh
+# File Type       : bash
+# Created on      : MAR-22-2021
+# comments        : It should valled from getter method.
+# step to do
+# ------------------------------------------------------------------
+#
+#
+PRG_NAME=$0
+ECHO=/bin/echo 
+SED=/bin/sed
+TR=/usr/bin/tr
+SLEEP=/bin/sleep
+#
+#
+#########################################################
+function Usage
+{
+   ${ECHO} ""
+   ${ECHO} " Usage : $0 PSFT_ENV_SH_LOCN and 25 parameters need to send  "
+   ${ECHO} ""
+   ${ECHO} ""
+}
+#
+#########################################################
+#
+#
+function verify_notnull ()
+{
+if test -z "$1";
+then
+   ${ECHO}
+   ${ECHO} "Error : $2 value not Specified !"
+   ${ECHO}
+   Usage
+   exit 1
+fi
+}
+
+#########################################################
+function setval_ifnull ()
+{
+if test -z "$1";
+then
+eval "$2=\"$3\""
+fi
+}
+#
+#########################################################
+#
+
+PRG_NAME=$0
+
+ENV_NAME="$1"
+
+PSFT_ENV_SH_LOCN="$2"
+
+PS_CFG_HOME="$3" 
+PS_APP_HOME="$4" 
+
+DOMAIN_NAME="$5"
+BEA_HOME="$6"
+
+USER_ID="$7"
+USER_PWD="$8"
+USER_PWD_RETYPE="$USER_PWD"
+
+${ECHO} " User Password  USER_PWD  ${USER_PWD}"
+
+INSTALL_ACTION="$9"
+DOMAIN_TYPE="${10}"
+INSTALL_TYPE="${11}"
+
+WEBSITE_NAME="${12}"
+APPSERVER_NAME="${13}"
+PSSERVER="${14}"
+JSL_PORT="${15}"
+
+HTTP_PORT="${16}"
+HTTPS_PORT="${17}"
+AUTH_DOMAIN="${18}"
+
+WEB_PROF_NAME="${19}"
+
+WEB_PROF_PWD="${20}"
+WEB_PROF_PWD_RETYPE=$WEB_PROF_PWD
+
+IGW_USERID="${21}"
+
+IGW_PWD="${22}"
+IGW_PWD_RETYPE=$IGW_PWD
+
+APPSRVR_CONN_PWD="${23}"
+APPSRVR_CONN_PWD_RETYPE=APPSRVR_CONN_PWD
+REPORTS_DIR="${24}"
+
+SERVER_TYPE="weblogic"
+
+#-------------------------------
+verify_notnull "$PSFT_ENV_SH_LOCN" "PSFT_ENV_SH_LOCN" 
+verify_notnull "$PS_CFG_HOME" "PS_CFG_HOME"
+
+verify_notnull "$DOMAIN_NAME" "DOMAIN_NAME"
+verify_notnull "$BEA_HOME" "BEA_HOME"
+
+verify_notnull "$USER_ID" "USER_ID"
+verify_notnull "$USER_PWD" "USER_PWD"
+
+
+verify_notnull "$INSTALL_ACTION" "INSTALL_ACTION"
+verify_notnull "$DOMAIN_TYPE" "DOMAIN_TYPE"
+verify_notnull "$INSTALL_TYPE" "INSTALL_TYPE"
+
+verify_notnull "$WEBSITE_NAME" "WEBSITE_NAME"
+verify_notnull "$APPSERVER_NAME" "APPSERVER_NAME"
+verify_notnull "$JSL_PORT" "JSL_PORT"
+
+verify_notnull "$HTTP_PORT" "HTTP_PORT"
+verify_notnull "$HTTPS_PORT" "HTTPS_PORT"
+verify_notnull "$AUTH_DOMAIN" "AUTH_DOMAIN"
+
+verify_notnull "$WEB_PROF_NAME" "WEB_PROF_NAME"
+verify_notnull "$WEB_PROF_PWD" "WEB_PROF_PWD"
+
+
+verify_notnull "$IGW_USERID" "IGW_USERID"
+verify_notnull "$IGW_PWD" "IGW_PWD"
+
+
+verify_notnull "$APPSRVR_CONN_PWD" "APPSRVR_CONN_PWD"
+verify_notnull "$REPORTS_DIR" "REPORTS_DIR"
+#-------------------------------
+##create name for Response File
+tmp_resp_file_nme=/tmp/tmpresp${RANDOM}${RANDOM}.rsp
+${ECHO} ${tmp_resp_file_nme}
+#-------------------------------
+# Execute psft_env.sh to set PS_HOME
+
+
+PS_ENV=$ENV_NAME
+export PS_ENV
+
+##.  ${PSFT_ENV_SH_LOCN}/psft_env4dappspuppet.sh
+
+##. /apps/mwhome/psoft/pt/psft_env.sh 
+.  /psoft/pt/psft_env.sh
+
+#------------------------------
+##create Response File
+
+${ECHO} "PS_CFG_HOME=${PS_CFG_HOME}">${tmp_resp_file_nme}
+${ECHO} "DOMAIN_NAME=${DOMAIN_NAME}">>${tmp_resp_file_nme}
+${ECHO} "BEA_HOME=${BEA_HOME}">>${tmp_resp_file_nme}
+
+${ECHO} "USER_ID=${USER_ID}">>${tmp_resp_file_nme}
+${ECHO} "USER_PWD=${USER_PWD}">>${tmp_resp_file_nme}
+${ECHO} "USER_PWD_RETYPE=${USER_PWD}">>${tmp_resp_file_nme}
+
+
+${ECHO} "INSTALL_ACTION=${INSTALL_ACTION}">>${tmp_resp_file_nme}
+${ECHO} "DOMAIN_TYPE=${DOMAIN_TYPE}">>${tmp_resp_file_nme}
+${ECHO} "INSTALL_TYPE=${INSTALL_TYPE}">>${tmp_resp_file_nme}
+
+${ECHO} "WEBSITE_NAME=${WEBSITE_NAME}">>${tmp_resp_file_nme}
+${ECHO} "APPSERVER_NAME=${APPSERVER_NAME}">>${tmp_resp_file_nme}
+${ECHO} "JSL_PORT=${JSL_PORT}">>${tmp_resp_file_nme}
+
+${ECHO} "HTTP_PORT=${HTTP_PORT}">>${tmp_resp_file_nme}
+${ECHO} "HTTPS_PORT=${HTTPS_PORT}">>${tmp_resp_file_nme}
+${ECHO} "AUTH_DOMAIN=${AUTH_DOMAIN}">>${tmp_resp_file_nme}
+
+${ECHO} "WEB_PROF_NAME=${WEB_PROF_NAME}">>${tmp_resp_file_nme}
+${ECHO} "WEB_PROF_PWD=${WEB_PROF_PWD}">>${tmp_resp_file_nme}
+${ECHO} "WEB_PROF_PWD_RETYPE=${WEB_PROF_PWD}">>${tmp_resp_file_nme}
+
+${ECHO} "IGW_USERID=${IGW_USERID}">>${tmp_resp_file_nme}
+${ECHO} "IGW_PWD=${IGW_PWD}">>${tmp_resp_file_nme}
+${ECHO} "IGW_PWD_RETYPE=${IGW_PWD}">>${tmp_resp_file_nme}
+
+${ECHO} "APPSRVR_CONN_PWD=${APPSRVR_CONN_PWD}">>${tmp_resp_file_nme}
+${ECHO} "APPSRVR_CONN_PWD_RETYPE=${APPSRVR_CONN_PWD}">>${tmp_resp_file_nme}
+${ECHO} "REPORTS_DIR=${REPORTS_DIR}">>${tmp_resp_file_nme}
+
+${ECHO} "SERVER_TYPE=weblogic">>${tmp_resp_file_nme}
+
+#-------------------------------------------------
+#execute setup.sh now using this config file
+
+${PS_HOME}/setup/PsMpPIAInstall/setup.sh -i silent -DRES_FILE_PATH=${tmp_resp_file_nme} 
+#-------------------------------------------------
+#
+#remove response file after completion
+$SLEEP 10
+##/bin/rm >${tmp_resp_file_nme}
+##=========================END======================
+##==================================================
+

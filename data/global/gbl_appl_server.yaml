@@ -1,0 +1,215 @@
+gbl_msln_attrib: 
+  msln_encryption: ENCRYPT
+  msln_template:   medium
+  msln_dboptions_enabledbmonitoring: 0
+
+gbl_pwd_attrib:
+  pwd_domainconnectionpwd: "U2FxxxxxxxxxxxxxxxxxxxxxmFRLj4="
+  pwd_userpswd: "U2FsdGVkXxxxxxxxxxxxxxxxxxxxxxFNokmFXOI6yGYWuT2"
+  pwd_connectpswd: "U2FsdxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxkREv0H1KU6"
+
+
+gbl_startup_attrib:
+  dbname: PROJSTG
+  dbtype: ORACLE
+  userid: PS
+  connectid: persons
+
+gbl_domain_attrib: 
+  addtopath: "/apps/oracle/product/12.2/db/bin"
+  allowdynamicchanges: Y
+
+gbl_psappsrvattrib: 
+  maxfetchsize: '15000'
+  maxinstances: '10'
+  mininstances: '5'  
+ 
+gbl_psrensrvattrib: 
+  default_auth_token: .company.com
+
+gbl_psqrysrv_attrib:
+  mininstances: 3
+  maxinstances: 5
+  javavmoptions: "JavaVM Options=-Dxdo.ConfigFile=%PS_HOME%/appserv/xdo.cfg -Xms256m -Xmx512m"
+
+gbl_psmonitorsrv_attrib:
+  javavmoptions: "JavaVM Options=-Dxdo.ConfigFile=%PS_HOME%/appserv/xdo.cfg -Xms256m -Xmx512m"
+
+gbl_proccess: 
+  pssamsrv_mininstances: 2
+  pssamsrv_maxinstances: 2
+  psqcksrv_mininstances: 3
+  psqcksrv_maxinstances: 5
+  psmsghnd_mininstances: 5
+  psmsghnd_maxinstances: 10
+
+gbl_jolt:
+ minhandlers: 9
+ maxhandlers: 12
+
+gbl_workstation:
+ minhandlers: 5
+ maxhandlers: 12
+
+
+gbl_psbrkdsp_dflt:
+  recyclecount: 0
+  allowedconsecservicefailures: 0
+  dispatch_list_multiplier: 10  
+  scan_interval: 15
+  dispatcher_queue_max_queue_size: 1000
+  memory_queue_refresh_rate: 1000
+  restart_period: 120
+
+gbl_psbrkhnd_dflt:
+  mininstances: 9
+  maxinstances: 9
+  servicetimeout: 1200
+  recyclecount: 0
+  allowedconsecservicefailures: 0
+  maxretries: 5
+
+gbl_pssubdsp_dflt:
+  recyclecount: 0
+  allowedconsecservicefailures: 0
+  dispatch_list_multiplier: 10  
+  scan_interval: 15
+  dispatcher_queue_max_queue_size: 1000
+  memory_queue_refresh_rate: 1000
+  restart_period: 120
+
+gbl_pssubhnd_dflt:
+  mininstances: 9
+  maxinstances: 9
+  servicetimeout: 1200
+  recyclecount: 20000
+  allowedconsecservicefailures: 0
+  maxretries: 5
+
+gbl_pspubdsp_dflt:
+  recyclecount: 0
+  allowedconsecservicefailures: 0
+  dispatch_list_multiplier: 10  
+  scan_interval: 15
+  ping_rate: 150   
+  maximum_ping_interval: 1
+  dispatcher_queue_max_queue_size: 1000
+  memory_queue_refresh_rate: 1000
+  restart_period: 120
+ 
+gbl_pspubhnd_dflt:
+  mininstances: 9
+  maxinstances: 9
+  servicetimeout: 1200
+  recyclecount: 20000
+  allowedconsecservicefailures: 0
+  thread_pool_size: 1
+  maxretries: 5
+
+gbl_psbrkdsp_cnfdsp:
+  recyclecount: 0
+  allowedconsecservicefailures: 0
+  dispatch_list_multiplier: 10  
+  scan_interval: 15
+  dispatcher_queue_max_queue_size: 1000
+  memory_queue_refresh_rate: 1000
+  restart_period: 120
+  queues: "BC_FILETRANSFER_CONF_QUEUE"
+
+
+gbl_psbrkhnd_cnfdsp:
+  mininstances: 12
+  maxinstances: 12
+  servicetimeout: 1200
+  recyclecount: 20000
+  allowedconsecservicefailures: 0
+  maxretries: 5
+
+
+gbl_pssubdsp_cnfsub:
+  recyclecount: 0
+  allowedconsecservicefailures: 0
+  dispatch_list_multiplier: 20  
+  scan_interval: 15
+  dispatcher_queue_max_queue_size: 1000
+  memory_queue_refresh_rate: 1000
+  restart_period: 120
+  queues: "BC_FILETRANSFER_CONF_QUEUE"
+
+gbl_pssubhnd_cnfsub:
+  mininstances: 12
+  maxinstances: 12
+  servicetimeout: 1200
+  recyclecount: 20000
+  allowedconsecservicefailures: 0
+  maxretries: 5
+
+
+gbl_psbrkdsp_mftdsp:
+  recyclecount: 0
+  allowedconsecservicefailures: 0
+  dispatch_list_multiplier: 10  
+  scan_interval: 15
+  dispatcher_queue_max_queue_size: 1000
+  memory_queue_refresh_rate: 1000
+  restart_period: 120
+  queues: "BC_MFT_CSHARP_QUEUE,BC_MFT_RNS_PROFILE_QUEUE,BC_MFT_CHEC_QUEUE"
+
+
+gbl_psbrkhnd_mftdsp:
+  mininstances: 6
+  maxinstances: 6
+  servicetimeout: 1200
+  recyclecount: 20000
+  allowedconsecservicefailures: 0
+  maxretries: 5
+
+gbl_pspubdsp_mftpub:
+  recyclecount: 0
+  allowedconsecservicefailures: 0
+  dispatch_list_multiplier: 10  
+  scan_interval: 15
+  dispatcher_queue_max_queue_size: 1000
+  memory_queue_refresh_rate: 1000
+  restart_period: 120
+  queues: "BC_MFT_CSHARP_QUEUE,BC_MFT_RNS_PROFILE_QUEUE,BC_MFT_CHEC_QUEUE"
+
+gbl_pspubhnd_mftpub:
+  mininstances: 6
+  maxinstances: 6
+  servicetimeout: 1200
+  recyclecount: 20000
+  allowedconsecservicefailures: 0
+  maxretries: 5
+  thread_pool_size: 1
+
+gbl_smtp:
+  smtpserver: mail.company.com
+  smtpport: 25
+  smtpsender: adsd.proj.tech.support.list@company.com
+
+gbl_smtp_smtpsourcemachine: doleldap001..company.com
+
+gbl_pstools_attrib:
+  dbflags: 8
+  enableppmagent: 0
+  remoteadminport: 10100
+  remoteadminuserid: "PS"
+  remoteadminpassword: "U2FxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxYWuT2" 
+
+
+
+gbl_feature_str: '{PUBSUB}=Yes#{QUICKSRV}=No#{QUERYSRV}=No#{JOLT}=Yes#{JRAD}=No#{WSL}=Yes#{DBGSRV}=No#{RENSRV}=No#{MCF}=No#{PPM}=No#{PSPPMSRV}=No#{ANALYTICSRV}=Yes#{SERVER_EVENTS}=Yes#{DOMAIN_GW}=No'
+
+gbl_ps_location:
+  ps_home: "/psoft/pt/ps_home8.58.08"
+  ps_app_home: "/psoft/hcm/projstg"
+  ps_config_home: "/pscfghome/home/psadmin2/projstg"
+  ps_custom_home: "/psoft/hcm/proj/projstg"
+
+scripts_file_location:
+   psft_env_sh_location: "/psoft/psoft_scripts/utils"
+   bash_file_location: "/psoft/psoft_scripts/utils/puppet_code/proj_psadmin/production/modules/stdlib/bashfiles"  
+   python_file_location: "/psoft/psoft_scripts/utils/puppet_code/proj_psadmin/production/modules/stdlib/python_source"  
+
+

@@ -1,0 +1,6 @@
+projprd6_1_prcs_process_scheduler:
+  prcsservername: PSCBL1
+  prcssrvrdomain: PROJPRD6_1
+
+projprd6_1_prcs_smtp:
+  smtpsourcemachine: "poeldapm06.company.com"

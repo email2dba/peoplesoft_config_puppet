@@ -1,0 +1,12 @@
+projprd1_1_webdomain_attrib:
+  webdomainname: PROJPRD1_1
+  appserverhost: poeldapm01.company.com
+  pia_private_key_alias: poeldapm01-new
+  pia_name: PIA
+  pia_listen_address: "poeldapm01.company.com"
+  psserver: "poeldapm01.company.com:22000"
+
+projprd1_1_webport_attrib:
+  http_port: 14002
+  https_port: 14003
+  jslport: 22000
